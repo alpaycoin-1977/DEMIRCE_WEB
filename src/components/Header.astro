@@ -1,0 +1,371 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { ROUTES, t, type Lang } from '~/i18n/ui';
+import { SITE } from '~/data/site';
+
+interface Props {
+  lang: Lang;
+  alternates: { tr: string; en: string };
+}
+const { lang, alternates } = Astro.props;
+const tr = t(lang);
+const path = Astro.url.pathname;
+const nav = [
+  { key: 'projects', label: tr('nav.projects') },
+  { key: 'office', label: tr('nav.office') },
+  { key: 'services', label: tr('nav.services') },
+  { key: 'journal', label: tr('nav.journal') },
+  { key: 'contact', label: tr('nav.contact') },
+] as const;
+const isActive = (href: string) => path === href || (href !== ROUTES.home[lang] && path.startsWith(href));
+const other = lang === 'tr' ? 'en' : 'tr';
+---
+
+<header class="site-header" data-header>
+  <div class="wrap bar">
+    <a href={ROUTES.home[lang]} class="brand" aria-label={`${SITE.name} — ${tr('nav.home')}`}>
+      <Logo variant="full" />
+    </a>
+
+    <nav class="nav-main" aria-label={lang === 'tr' ? 'Ana menü' : 'Main navigation'}>
+      <ul>
+        {
+          nav.map((n) => (
+            <li>
+              <a href={ROUTES[n.key][lang]} aria-current={isActive(ROUTES[n.key][lang]) ? 'page' : undefined}>
+                {n.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <button type="button" class="search-btn" data-open-palette aria-label={tr('search.open')} aria-keyshortcuts="Control+K Meta+K">
+        <Icon name="search" size={18} />
+        <span class="search-label">{tr('search.open')}</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <a href={ROUTES.board[lang]} class="icon-btn board-link" aria-label={tr('nav.board')} title={tr('nav.board')}>
+        <Icon name="heart" />
+        <span class="badge" data-board-count hidden>0</span>
+      </a>
+      <button
+        type="button"
+        class="icon-btn theme-btn"
+        data-theme-toggle
+        aria-label={tr('theme.toggle')}
+        title={tr('theme.toggle')}
+        data-labels={JSON.stringify({ light: tr('theme.light'), dark: tr('theme.dark'), blueprint: tr('theme.blueprint') })}
+      >
+        <span class="ti ti-light"><Icon name="sun" /></span>
+        <span class="ti ti-dark"><Icon name="moon" /></span>
+        <span class="ti ti-blueprint"><Icon name="blueprint" /></span>
+      </button>
+      <a href={alternates[other]} class="lang-link" hreflang={other} lang={other} title={tr('lang.switch')}>
+        {tr('lang.short')}
+      </a>
+      <a href={ROUTES.feasibility[lang]} class="btn btn--accent start-btn">{tr('nav.start')}</a>
+      <button type="button" class="icon-btn menu-btn" data-menu-open aria-haspopup="dialog" aria-controls="mobil-menu" aria-label={tr('nav.menu')}>
+        <Icon name="menu" />
+      </button>
+    </div>
+  </div>
+
+  <dialog id="mobil-menu" class="mobile-menu" aria-label={tr('nav.menu')}>
+    <div class="mm-top wrap">
+      <span class="label muted">{tr('nav.menu')}</span>
+      <button type="button" class="icon-btn" data-menu-close aria-label={tr('nav.close')}><Icon name="close" /></button>
+    </div>
+    <nav class="wrap mm-nav" aria-label={tr('nav.menu')}>
+      <ol>
+        {
+          nav.map((n, i) => (
+            <li>
+              <a href={ROUTES[n.key][lang]} aria-current={isActive(ROUTES[n.key][lang]) ? 'page' : undefined}>
+                <span class="label">{String(i + 1).padStart(2, '0')}</span>
+                {n.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a href={ROUTES.feasibility[lang]}><span class="label">06</span>{tr('nav.feasibility')}</a>
+        </li>
+        <li>
+          <a href={ROUTES.board[lang]}><span class="label">07</span>{tr('nav.board')}</a>
+        </li>
+      </ol>
+    </nav>
+    <div class="wrap mm-foot">
+      <a href={SITE.phoneHref} class="mono">{SITE.phone}</a>
+      <a href={`mailto:${SITE.email}`} class="mono" style="text-transform:none">{SITE.email}</a>
+      <a href={alternates[other]} hreflang={other} lang={other} class="mono">{tr('lang.switch')} →</a>
+    </div>
+  </dialog>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: var(--header-h);
+    background: var(--glass);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid var(--line);
+    transition:
+      transform 0.45s var(--ease-out),
+      background 0.3s;
+    view-transition-name: site-header;
+  }
+  :global(.header-hidden) .site-header {
+    transform: translateY(-100%);
+  }
+  .bar {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .brand {
+    display: block;
+    color: var(--ink);
+    flex: none;
+  }
+  .brand :global(.logo) {
+    height: 20px;
+    width: auto;
+  }
+  .nav-main {
+    margin-inline: auto;
+  }
+  .nav-main ul {
+    display: flex;
+    gap: clamp(12px, 2vw, 32px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav-main a {
+    position: relative;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 8px 0;
+  }
+  .nav-main a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 2px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.35s var(--ease-out);
+  }
+  .nav-main a:hover::after,
+  .nav-main a[aria-current='page']::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+  .nav-main + .actions {
+    margin-left: 0;
+  }
+  .search-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 10px 0 12px;
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-2);
+  }
+  .search-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  kbd {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    padding: 2px 5px;
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+  }
+  .board-link {
+    position: relative;
+  }
+  .badge {
+    position: absolute;
+    top: 6px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font: 600 10px/16px var(--font-mono);
+    text-align: center;
+  }
+  .ti {
+    display: none;
+  }
+  :global(html:not([data-theme])) .ti-light,
+  :global(html[data-theme='light']) .ti-light,
+  :global(html[data-theme='dark']) .ti-dark,
+  :global(html[data-theme='blueprint']) .ti-blueprint {
+    display: grid;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(html:not([data-theme])) .ti-light {
+      display: none;
+    }
+    :global(html:not([data-theme])) .ti-dark {
+      display: grid;
+    }
+  }
+  .lang-link {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+  .lang-link:hover {
+    color: var(--accent-text);
+  }
+  .start-btn {
+    min-height: 40px;
+    padding-block: 0.5em;
+    margin-left: 6px;
+  }
+  .menu-btn {
+    display: none;
+  }
+  @media (max-width: 1180px) {
+    .search-label {
+      display: none;
+    }
+  }
+  @media (max-width: 1020px) {
+    .nav-main,
+    .start-btn,
+    .search-btn kbd {
+      display: none;
+    }
+    .menu-btn {
+      display: inline-grid;
+    }
+  }
+  @media (max-width: 520px) {
+    .lang-link,
+    .board-link {
+      display: none;
+    }
+    .search-btn {
+      border: 0;
+      padding: 0 8px;
+    }
+    .actions {
+      gap: 0;
+    }
+  }
+
+  /* Mobil menü (dialog) */
+  .mobile-menu {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--paper);
+    color: var(--ink);
+    display: none;
+    flex-direction: column;
+  }
+  .mobile-menu[open] {
+    display: flex;
+    animation: mm-in 0.4s var(--ease-out);
+  }
+  .mobile-menu::backdrop {
+    background: transparent;
+  }
+  @keyframes mm-in {
+    from {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+  }
+  .mm-top {
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+  }
+  .mm-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding-block: 24px;
+  }
+  .mm-nav ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .mm-nav a {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-display);
+    font-stretch: 62.5%;
+    font-size: clamp(2.2rem, 10vw, 4rem);
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .mm-nav a[aria-current='page'] {
+    color: var(--accent-text);
+  }
+  .mm-nav .label {
+    color: var(--ink-3);
+    font-stretch: 100%;
+  }
+  .mm-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    padding-block: 20px calc(20px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+  }
+  .mm-foot a {
+    text-decoration: none;
+  }
+</style>

@@ -1,0 +1,422 @@
+---
+import { getImage } from 'astro:assets';
+import Base from '~/layouts/Base.astro';
+import ProjectCard from '~/components/ProjectCard.astro';
+import ProjectMap from '~/components/ProjectMap.astro';
+import Icon from '~/components/Icon.astro';
+import { projects, CATEGORY_ORDER, placeLabel, countryName } from '~/data/projects';
+import { archive } from '~/data/archive';
+import { projectCover } from '~/lib/images';
+import { ROUTES, t, projectUrl, postUrl, type Lang } from '~/i18n/ui';
+import { brandSafe } from '~/lib/text';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const tr = t(lang);
+const counts = Object.fromEntries(CATEGORY_ORDER.map((c) => [c, projects.filter((p) => p.categories.includes(c)).length]));
+const cats = CATEGORY_ORDER.filter((c) => counts[c] > 0);
+const thumbs = Object.fromEntries(
+  await Promise.all(projects.map(async (p) => [p.slug, (await getImage({ src: projectCover(p.slug), width: 520, format: 'webp', quality: 70 })).src])),
+);
+const c =
+  lang === 'tr'
+    ? {
+        title: 'Projeler',
+        lead: 'Otelden rezidansa, eğitim kampüslerinden iç mekânlara: her proje, mekânı tanımlayan adımların tek bir konseptte birleşmesi.',
+        filter: 'Kategoriye göre filtrele',
+        view: 'Görünüm',
+        archiveTitle: 'Arşiv',
+        archiveLead: 'Eski günlük kayıtlarımızda yer alan diğer işler.',
+        cols: ['Proje', 'Konum', 'Kategori', 'Yıl'],
+        none: 'Bu kategoride proje yok.',
+      }
+    : {
+        title: 'Projects',
+        lead: 'From hotels to residences, campuses to interiors: each project brings the steps that define a space together under one concept.',
+        filter: 'Filter by category',
+        view: 'View',
+        archiveTitle: 'Archive',
+        archiveLead: 'Other work recorded in our earlier journal.',
+        cols: ['Project', 'Location', 'Category', 'Year'],
+        none: 'No projects in this category.',
+      };
+const crumbs = {
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: tr('nav.home'), item: new URL(ROUTES.home[lang], Astro.site).href },
+    { '@type': 'ListItem', position: 2, name: c.title, item: new URL(ROUTES.projects[lang], Astro.site).href },
+  ],
+};
+---
+
+<Base lang={lang} title={c.title} description={c.lead} route="projects" sheet="A-10" jsonLd={[crumbs]}>
+  <div class="wrap page-head">
+    <p class="label muted"><span class="accent">A-10 — </span>{tr('common.since')}</p>
+    <h1 class="display">{c.title} <sup class="mono count">{projects.length}</sup></h1>
+    <p class="lead">{c.lead}</p>
+  </div>
+
+  <div class="wrap toolbar" data-projects-toolbar>
+    <div class="filters" role="group" aria-label={c.filter}>
+      <button type="button" class="chip" aria-pressed="true" data-filter="all">{tr('cat.all')} <span class="count">{projects.length}</span></button>
+      {
+        cats.map((cat) => (
+          <button type="button" class="chip" aria-pressed="false" data-filter={cat}>
+            {tr(`cat.${cat}` as const)} <span class="count">{counts[cat]}</span>
+          </button>
+        ))
+      }
+    </div>
+    <div class="views" role="group" aria-label={c.view}>
+      <button type="button" class="icon-btn" aria-pressed="true" data-view="grid" title={tr('view.grid')} aria-label={tr('view.grid')}><Icon name="grid" /></button>
+      <button type="button" class="icon-btn" aria-pressed="false" data-view="list" title={tr('view.list')} aria-label={tr('view.list')}><Icon name="list" /></button>
+      <button type="button" class="icon-btn" aria-pressed="false" data-view="map" title={tr('view.map')} aria-label={tr('view.map')}><Icon name="map" /></button>
+    </div>
+  </div>
+
+  <div class="wrap" data-projects data-mode="grid">
+    <p class="mono muted live" aria-live="polite" data-result-count></p>
+
+    <div class="pgrid" data-pane="grid">
+      {projects.map((p, i) => <ProjectCard project={p} lang={lang} index={i + 1} eager={i < 3} />)}
+    </div>
+
+    <div class="plist" data-pane="list" hidden>
+      <div class="plist-head mono muted" aria-hidden="true">{c.cols.map((col) => <span>{col}</span>)}</div>
+      <ul>
+        {
+          projects.map((p) => (
+            <li data-cats={p.categories.join(' ')}>
+              <a href={projectUrl(p.slug, lang)} data-thumb={thumbs[p.slug]} style={`--pc:${p.color}`}>
+                <span class="pl-t display" set:html={brandSafe(p.title[lang], lang)} />
+                <span class="pl-l">
+                  {placeLabel(p, lang)}
+                  {p.city ? ` · ${countryName(p.country, lang)}` : ''}
+                </span>
+                <span class="pl-c mono">{p.categories.map((x) => tr(`cat.${x}` as const)).join(', ')}</span>
+                <span class="pl-y mono">{p.year ?? '—'}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <img class="hover-thumb no-blueprint" alt="" aria-hidden="true" data-hover-thumb />
+    </div>
+
+    <div data-pane="map" hidden>
+      <ProjectMap lang={lang} id="proje-harita" />
+    </div>
+    <p class="mono muted" data-empty hidden>{c.none}</p>
+  </div>
+
+  <section class="wrap archive" aria-labelledby="arsiv">
+    <header class="section-head">
+      <div>
+        <span class="label"><span class="accent">A-19 — </span>{c.archiveLead}</span>
+        <h2 id="arsiv">{c.archiveTitle}</h2>
+      </div>
+      <span class="mono muted">{archive.length}</span>
+    </header>
+    <table class="atable">
+      <thead class="mono muted">
+        <tr>{c.cols.map((col) => <th scope="col">{col}</th>)}</tr>
+      </thead>
+      <tbody>
+        {
+          archive.map((a) => (
+            <tr>
+              <th scope="row">
+                {a.post ? <a href={postUrl(a.post, lang)} set:html={brandSafe(a.name[lang], lang)} /> : <span set:html={brandSafe(a.name[lang], lang)} />}
+                {a.note && <span class="anote">{a.note[lang]}</span>}
+              </th>
+              <td>{a.place?.[lang] ?? '—'}</td>
+              <td class="mono">{a.category ? tr(`cat.${a.category}` as const) : '—'}</td>
+              <td class="mono">{a.year}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </section>
+</Base>
+
+<style>
+  .page-head {
+    padding-block: clamp(48px, 8vw, 120px) clamp(24px, 4vw, 48px);
+  }
+  .page-head h1 {
+    font-size: var(--step-5);
+    margin: 18px 0 24px;
+  }
+  .count {
+    font-size: var(--step--1);
+    vertical-align: super;
+    color: var(--accent-text);
+  }
+  .toolbar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding-block: 12px;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-block: 1px solid var(--line);
+    transition: top 0.45s var(--ease-out);
+  }
+  :global(.header-hidden) .toolbar {
+    top: 0;
+  }
+  .filters {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .views {
+    display: flex;
+    flex: none;
+  }
+  .views [aria-pressed='true'] {
+    border-color: var(--ink);
+  }
+  .live {
+    margin: 20px 0;
+    min-height: 1em;
+  }
+  .pgrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(32px, 4vw, 56px) clamp(16px, 2vw, 28px);
+  }
+  .plist ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .plist-head,
+  .plist a {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr) minmax(0, 1.4fr) 70px;
+    gap: 20px;
+    align-items: baseline;
+  }
+  .plist-head {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--ink);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+  }
+  .plist a {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    transition:
+      padding 0.35s var(--ease-out),
+      color 0.2s;
+  }
+  .plist a:hover,
+  .plist a:focus-visible {
+    padding-left: 14px;
+    color: var(--pc);
+  }
+  :global([data-theme='dark']) .plist a:hover,
+  :global([data-theme='blueprint']) .plist a:hover {
+    color: var(--accent-text);
+  }
+  .pl-t {
+    font-size: var(--step-2);
+  }
+  .pl-l,
+  .pl-c,
+  .pl-y {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+  .hover-thumb {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+    transition:
+      opacity 0.2s,
+      transform 0.3s var(--ease-out);
+    box-shadow: var(--shadow);
+  }
+  .hover-thumb.is-on {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .archive {
+    padding-top: clamp(80px, 10vw, 160px);
+  }
+  .archive h2 {
+    font-size: var(--step-4);
+  }
+  .atable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .atable th,
+  .atable td {
+    text-align: left;
+    padding: 14px 16px 14px 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    font-weight: 400;
+  }
+  .atable thead th {
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    border-bottom-color: var(--ink);
+  }
+  .atable tbody th {
+    font-family: var(--font-display);
+    font-stretch: 75%;
+    font-size: var(--step-1);
+    font-weight: 500;
+    text-transform: uppercase;
+    line-height: 1.15;
+  }
+  .atable tbody th a {
+    text-decoration: none;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .atable tbody th a:hover {
+    color: var(--accent-text);
+  }
+  .anote {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--font-body);
+    font-stretch: 100%;
+    font-size: var(--step--1);
+    text-transform: none;
+    color: var(--ink-3);
+  }
+  .atable td {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+  @media (max-width: 1000px) {
+    .pgrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 640px) {
+    .pgrid {
+      grid-template-columns: 1fr;
+    }
+    .plist-head {
+      display: none;
+    }
+    .plist a {
+      grid-template-columns: 1fr auto;
+      gap: 4px 12px;
+    }
+    .pl-l,
+    .pl-c {
+      grid-column: 1;
+    }
+    .pl-y {
+      grid-row: 1;
+      grid-column: 2;
+    }
+    .atable thead {
+      display: none;
+    }
+    .atable tr {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0;
+    }
+    .atable th,
+    .atable td {
+      border: 0;
+      padding: 2px 0;
+    }
+    .atable tbody th {
+      grid-column: 1 / -1;
+    }
+  }
+</style>
+
+<script>
+  import { lang } from '~/scripts/ui';
+  const root = document.querySelector<HTMLElement>('[data-projects]');
+  const bar = document.querySelector<HTMLElement>('[data-projects-toolbar]');
+  if (root && bar) {
+    const filters = [...bar.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const views = [...bar.querySelectorAll<HTMLButtonElement>('[data-view]')];
+    const panes = [...root.querySelectorAll<HTMLElement>('[data-pane]')];
+    const cards = [...root.querySelectorAll<HTMLElement>('.pcard, .plist li')];
+    const counter = root.querySelector<HTMLElement>('[data-result-count]')!;
+    const empty = root.querySelector<HTMLElement>('[data-empty]')!;
+    const params = new URLSearchParams(location.search);
+    let cat = params.get('kategori') || params.get('category') || 'all';
+    let view = params.get('view') || 'grid';
+
+    const apply = (push = false) => {
+      filters.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === cat)));
+      views.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+      panes.forEach((p) => (p.hidden = p.dataset.pane !== view));
+      let n = 0;
+      cards.forEach((el) => {
+        const ok = cat === 'all' || (el.dataset.cats || '').split(' ').includes(cat);
+        el.hidden = !ok;
+        if (ok && el.classList.contains('pcard')) n++;
+      });
+      empty.hidden = n > 0 || view === 'map';
+      counter.textContent = view === 'map' ? '' : lang() === 'tr' ? `${n} proje gösteriliyor` : `Showing ${n} project${n === 1 ? '' : 's'}`;
+      if (push) {
+        const u = new URL(location.href);
+        cat === 'all' ? u.searchParams.delete('kategori') : u.searchParams.set('kategori', cat);
+        view === 'grid' ? u.searchParams.delete('view') : u.searchParams.set('view', view);
+        history.replaceState(null, '', u);
+      }
+    };
+    const run = (fn: () => void) => ('startViewTransition' in document ? (document as any).startViewTransition(fn) : fn());
+    filters.forEach((b) =>
+      b.addEventListener('click', () => {
+        cat = b.dataset.filter!;
+        run(() => apply(true));
+      }),
+    );
+    views.forEach((b) =>
+      b.addEventListener('click', () => {
+        view = b.dataset.view!;
+        run(() => apply(true));
+      }),
+    );
+    apply();
+
+    // Liste görünümünde imleci izleyen önizleme görseli
+    const thumb = root.querySelector<HTMLImageElement>('[data-hover-thumb]');
+    if (thumb && matchMedia('(pointer: fine)').matches) {
+      root.querySelectorAll<HTMLAnchorElement>('.plist a').forEach((a) => {
+        a.addEventListener('mouseenter', () => {
+          thumb.src = a.dataset.thumb!;
+          thumb.classList.add('is-on');
+        });
+        a.addEventListener('mouseleave', () => thumb.classList.remove('is-on'));
+        a.addEventListener('mousemove', (e) => {
+          thumb.style.left = `${e.clientX + 150}px`;
+          thumb.style.top = `${e.clientY}px`;
+        });
+      });
+    }
+  }
+</script>

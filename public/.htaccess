@@ -1,0 +1,149 @@
+# ==========================================================================
+# DEMİRCE — Apache yapılandırması (cPanel / paylaşımlı hosting)
+# Bu dosya derleme sırasında dist/ klasörüne kopyalanır.
+# ==========================================================================
+Options -MultiViews -Indexes
+DirectoryIndex index.html index.php
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # HTTPS'e yönlendir (proxy / CDN arkasında da çalışır)
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  # demirce.com → www.demirce.com
+  RewriteCond %{HTTP_HOST} ^demirce\.com$ [NC]
+  RewriteRule ^ https://www.demirce.com%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# --------------------------------------------------------------------------
+# Eski WordPress adreslerinden yeni adreslere kalıcı (301) yönlendirmeler
+# (arama motoru sıralamalarını ve eski bağlantıları korur)
+# --------------------------------------------------------------------------
+<IfModule mod_alias.c>
+  RedirectMatch 301 ^/portfolio/7047-2/?$ /projeler/otel-deco/
+  RedirectMatch 301 ^/portfolio/atlas-azur/?$ /projeler/atlas-azur/
+  RedirectMatch 301 ^/portfolio/borncity-rezidans-otel/?$ /projeler/borncity/
+  RedirectMatch 301 ^/portfolio/coordinat-bornova-ic-mekan/?$ /projeler/coordinat-bornova-ic-mekan/
+  RedirectMatch 301 ^/portfolio/coordinat-bornova/?$ /projeler/coordinat-bornova/
+  RedirectMatch 301 ^/portfolio/d-life-pandora/?$ /projeler/d-life-pandora/
+  RedirectMatch 301 ^/portfolio/fenix_84-rezidans_mimarisi-residence_architecture-konut_mimarisi-antalya/?$ /projeler/fenix84-antalya/
+  RedirectMatch 301 ^/portfolio/folkart-life-bornova-2/?$ /projeler/folkart-life-bornova/
+  RedirectMatch 301 ^/portfolio/ilayda-avantgarde-otel-ic-mekan/?$ /projeler/ilayda-avantgarde/
+  RedirectMatch 301 ^/portfolio/izmir-tinaztepe-universitesi-kampus-yerleskesi-tasarim-yarismasi/?$ /projeler/iztu-kampus-yarismasi/
+  RedirectMatch 301 ^/portfolio/la-bonita-cigli-2/?$ /projeler/la-bonita-cigli/
+  RedirectMatch 301 ^/portfolio/mersin-mezitli-egitim-kampusu-yarismasi-1-odul/?$ /projeler/mezitli-egitim-kampusu/
+  RedirectMatch 301 ^/portfolio/otel-lusso/?$ /projeler/otel-lusso/
+  RedirectMatch 301 ^/portfolio/sd-apartmani/?$ /projeler/sd-apartmani/
+  RedirectMatch 301 ^/portfolio/tlp-house/?$ /projeler/tlp-evi/
+  RedirectMatch 301 ^/portfolio/ypa.*-houses-kazakistan/?$ /projeler/ural-houses-kazakistan/
+  RedirectMatch 301 ^/portfolio/?$ /projeler/
+  RedirectMatch 301 ^/portfolyo/?$ /projeler/
+  RedirectMatch 301 ^/category/.*$ /gunluk/
+  RedirectMatch 301 ^/(comments/)?feed/?$ /rss.xml
+  RedirectMatch 301 ^/spa-wellness/?$ /gunluk/spa-wellness/
+  RedirectMatch 301 ^/demirce-norms-mimarlik-23-nisanda-cocuklara-ozel-bir-program-hazirladi/?$ /gunluk/23-nisan-cocuklar-icin-mimarlik/
+  RedirectMatch 301 ^/fenix84_antalya/?$ /gunluk/fenix84-temel-atma/
+  RedirectMatch 301 ^/flex-life-studio/?$ /gunluk/flex-life-studio/
+  RedirectMatch 301 ^/guzelbahce-reliance-red/?$ /gunluk/guzelbahce-reliance-red/
+  RedirectMatch 301 ^/izmir-mimarlar-odasisoylesi-bir-mimar-ve-uygulamalari/?$ /gunluk/bir-mimar-ve-uygulamalari/
+  RedirectMatch 301 ^/mimarizm-deyiz/?$ /gunluk/mimarizm-evzen/
+  RedirectMatch 301 ^/mimarlik-izmir-torbali-ayrancilar-fabrika/?$ /gunluk/ayg-fabrika/
+  RedirectMatch 301 ^/fabrika-cephe-detayi/?$ /gunluk/ayg-fabrika/
+  RedirectMatch 301 ^/izmir-smd-10-yil-ticaret-odasi-sergisi/?$ /gunluk/izmir-smd-10-yil-sergisi/
+  RedirectMatch 301 ^/m-e-b-egitim-kampusleri-mimari-proje-yarismasi-mersin-mezitli-egitim-kampusu-birincilik-odulu/?$ /gunluk/mezitli-birincilik-odulu/
+  RedirectMatch 301 ^/hurriyet-alpay-demirci-roportaji/?$ /gunluk/hurriyet-roportaj-simgesel-yapilar/
+  RedirectMatch 301 ^/mimarlik-izmir-sergi-koleksiyon-mobilya/?$ /gunluk/koleksiyon-ismd-sergisi/
+  RedirectMatch 301 ^/sergimizin-acilis-kokteyli/?$ /gunluk/koleksiyon-ismd-sergisi/
+  RedirectMatch 301 ^/koleksiyonismd-mimarlari-agirliyor/?$ /gunluk/koleksiyon-ismd-sergisi/
+  RedirectMatch 301 ^/lobi_parlas-projemiz-gorucuye-cikti/?$ /gunluk/parlas-rezidans/
+  RedirectMatch 301 ^/hotel-mono/?$ /gunluk/
+  RedirectMatch 301 ^/monaco-otel/?$ /gunluk/
+  RedirectMatch 301 ^/ortak-paylasim-alanlariyla-ilginc-bir-otel-deneyimi/?$ /gunluk/
+  RedirectMatch 301 ^/terra-lodge-hotel/?$ /gunluk/
+  RedirectMatch 301 ^/masallar-diyarinda-mimarlik/?$ /gunluk/
+  RedirectMatch 301 ^/hadi-bakalim-lego-icin-tasarla-zahahadidarchitects/?$ /gunluk/
+  RedirectMatch 301 ^/tasarimin-prensi-karim-rashid/?$ /gunluk/
+  RedirectMatch 301 ^/zaha-hadidden-nurnberg-sergi-salonu/?$ /gunluk/
+  RedirectMatch 301 ^/louis-vitton-foundation-frank-gehry/?$ /gunluk/
+  RedirectMatch 301 ^/zaha-hadidden-cinin-macau-sehri-icin-yeni-bir-otel/?$ /gunluk/
+  RedirectMatch 301 ^/expo-milano-2015-cin-pavyonu-tsinghua-universitesi-studyo-link-arc/?$ /gunluk/
+  RedirectMatch 301 ^/yeni-seinajoki-sehir-kutuphanesi/?$ /gunluk/
+  RedirectMatch 301 ^/mimarlik-soumaya-muzesi/?$ /gunluk/
+  RedirectMatch 301 ^/izmir-ekin-koleji-egitim-kampusu/?$ /gunluk/
+  RedirectMatch 301 ^/mimarlik-otel-mimari-proje-aydin-kusadasi/?$ /gunluk/
+  RedirectMatch 301 ^/kentsel-donusum-bilgilendirme-toplantisi/?$ /gunluk/
+  RedirectMatch 301 ^/izka-izmir-kalkinma-ajansi-yarismasi/?$ /gunluk/
+  RedirectMatch 301 ^/atlasvadi_istanbul-projemizde-ilk-tanisma-organizasyonu/?$ /gunluk/
+  RedirectMatch 301 ^/hotel-ilayda-avangarde-sonlara-dogru/?$ /gunluk/
+  RedirectMatch 301 ^/statu-projemiz-cok-yakinda/?$ /gunluk/
+  RedirectMatch 301 ^/atlasvadi-kule-vinc-transferi-ve-otopark-katlarinin-hazirliklari/?$ /gunluk/
+  RedirectMatch 301 ^/ekin3389/?$ /gunluk/
+  RedirectMatch 301 ^/balcova-modern-ilerlemekte/?$ /gunluk/
+  RedirectMatch 301 ^/deyis/?$ /gunluk/
+  RedirectMatch 301 ^/ilayda-avantgarde-otel-sonlara-dogru-merdiven-ucar/?$ /gunluk/
+  RedirectMatch 301 ^/ilayda-avantgarde-otel-sonlara-dogru/?$ /gunluk/
+  RedirectMatch 301 ^/kentsel-donusum-proje-sunumumuz/?$ /gunluk/
+  RedirectMatch 301 ^/balcova-modern-temel-hazirliklari/?$ /gunluk/
+  RedirectMatch 301 ^/3489/?$ /gunluk/
+  RedirectMatch 301 ^/ilayda-otel-cephe-modulleri/?$ /gunluk/
+  RedirectMatch 301 ^/ekin-koleji-seyrek-yerleskesi-sonlara-dogru/?$ /gunluk/
+  RedirectMatch 301 ^/ekin-koleji-mavisehir-yeni-yerleske/?$ /gunluk/
+  RedirectMatch 301 ^/hurriyet-26-nisan-2013/?$ /gunluk/
+  RedirectMatch 301 ^/ayg-fabrika-double-facade-mock-up/?$ /gunluk/
+  RedirectMatch 301 ^/iletisim$ /iletisim/
+  RedirectMatch 410 ^/(wp-login\.php|xmlrpc\.php|wp-admin/?.*)$
+</IfModule>
+
+# --------------------------------------------------------------------------
+# Güvenlik başlıkları
+# --------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self' mailto:; object-src 'none'"
+
+  # Önbellek: sürüm karmalı varlıklar 1 yıl, HTML ve service worker her seferinde kontrol
+  <FilesMatch "\.(html|webmanifest|xml|json)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "^sw\.js$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/avif "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+</IfModule>
+<IfModule mod_headers.c>
+  <If "%{REQUEST_URI} =~ m#^/_astro/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+</IfModule>
+
+# Sıkıştırma
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml application/rss+xml application/json application/manifest+json text/javascript application/javascript image/svg+xml
+</IfModule>
+
+# MIME türleri
+AddType application/manifest+json .webmanifest
+AddType image/avif .avif
+AddType image/webp .webp
+AddType font/woff2 .woff2
+AddType text/javascript .js .mjs
+AddDefaultCharset utf-8

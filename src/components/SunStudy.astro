@@ -1,0 +1,338 @@
+---
+/**
+ * GÜNEŞ ÇALIŞMASI — ana sayfa kahraman alanı.
+ * Alsancak ofisinin koordinatlarında gerçek güneş konumunu hesaplayıp beyaz bir
+ * çalışma maketi üzerinde gölgeleri canlı gösterir. Three.js yalnızca bu alan
+ * görünür olduğunda tembel (lazy) olarak yüklenir.
+ */
+import Icon from './Icon.astro';
+import { SITE } from '~/data/site';
+import type { Lang } from '~/i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const L =
+  lang === 'tr'
+    ? {
+        title: 'Güneş çalışması',
+        time: 'Saat',
+        date: 'Tarih',
+        today: 'Bugün',
+        mar: '21 Mart',
+        jun: '21 Haziran',
+        dec: '21 Aralık',
+        alt: 'Yükseklik',
+        az: 'Azimut',
+        rise: 'Doğuş',
+        set: 'Batış',
+        play: 'Günü oynat',
+        pause: 'Durdur',
+        now: 'Şimdi',
+        wind: 'İmbat',
+        windHint: 'Yaz öğleden sonraları körfezden esen batı-kuzeybatı meltemi',
+        hint: 'Sürükleyerek maketi çevirin',
+        panel: 'Güneş çalışması kontrolleri',
+        loc: 'Alsancak, İzmir',
+        night: 'Gece',
+        noWebgl: 'Tarayıcınız 3B görünümü desteklemiyor.',
+        collapse: 'Paneli gizle/göster',
+      }
+    : {
+        title: 'Sun study',
+        time: 'Time',
+        date: 'Date',
+        today: 'Today',
+        mar: '21 Mar',
+        jun: '21 Jun',
+        dec: '21 Dec',
+        alt: 'Altitude',
+        az: 'Azimuth',
+        rise: 'Sunrise',
+        set: 'Sunset',
+        play: 'Play the day',
+        pause: 'Pause',
+        now: 'Now',
+        wind: 'İmbat',
+        windHint: 'The west-north-westerly sea breeze that cools İzmir on summer afternoons',
+        hint: 'Drag to rotate the model',
+        panel: 'Sun study controls',
+        loc: 'Alsancak, İzmir',
+        night: 'Night',
+        noWebgl: 'Your browser does not support the 3D view.',
+        collapse: 'Toggle panel',
+      };
+---
+
+<section class="sun" data-sun data-lat={SITE.geo.lat} data-lon={SITE.geo.lon} data-offset={SITE.utcOffset} data-labels={JSON.stringify(L)}>
+  <div class="sun-canvas" data-sun-canvas aria-hidden="true"></div>
+  <div class="sun-compass" aria-hidden="true" data-sun-compass>
+    <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-opacity=".35" /><path d="M24 6 29 26 24 22 19 26Z" fill="currentColor" /><text x="24" y="44" text-anchor="middle" font-size="8" font-family="monospace" fill="currentColor">N</text></svg>
+  </div>
+
+  <div class="sun-overlay wrap">
+    <slot />
+  </div>
+
+  <div class="sun-panel" role="group" aria-label={L.panel} data-sun-panel>
+    <div class="sp-head">
+      <span class="label"><span class="dot" aria-hidden="true"></span>{L.title} · {L.loc}</span>
+      <button type="button" class="sp-toggle" data-sun-collapse aria-expanded="true" aria-label={L.collapse}><Icon name="minus" size={16} /></button>
+    </div>
+    <div class="sp-body">
+      <dl class="sp-read">
+        <div><dt>{L.time}</dt><dd data-r="time">--:--</dd></div>
+        <div><dt>{L.alt}</dt><dd data-r="alt">—</dd></div>
+        <div><dt>{L.az}</dt><dd data-r="az">—</dd></div>
+        <div class="hide-s"><dt>{L.rise} / {L.set}</dt><dd data-r="riseSet">—</dd></div>
+      </dl>
+      <label class="sr-only" for="sun-time">{L.time}</label>
+      <div class="sp-slider">
+        <input id="sun-time" type="range" min="0" max="1439" step="5" value="720" data-sun-time />
+        <div class="ticks mono" aria-hidden="true"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+      </div>
+      <div class="sp-row" role="group" aria-label={L.date}>
+        <button type="button" class="chip" aria-pressed="true" data-sun-date="today">{L.today}</button>
+        <button type="button" class="chip" aria-pressed="false" data-sun-date="03-21">{L.mar}</button>
+        <button type="button" class="chip" aria-pressed="false" data-sun-date="06-21">{L.jun}</button>
+        <button type="button" class="chip" aria-pressed="false" data-sun-date="12-21">{L.dec}</button>
+      </div>
+      <div class="sp-row">
+        <button type="button" class="chip" aria-pressed="false" data-sun-play><Icon name="play" size={12} /><span>{L.play}</span></button>
+        <button type="button" class="chip" aria-pressed="true" data-sun-now><Icon name="clock" size={14} />{L.now}</button>
+        <button type="button" class="chip" aria-pressed="false" data-sun-wind title={L.windHint}><Icon name="wind" size={14} />{L.wind}</button>
+      </div>
+      <p class="sp-hint mono muted" data-sun-hint>{L.hint}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sun {
+    --sky: #e3e8ea;
+    --hero-ink: var(--ink);
+    position: relative;
+    min-height: calc(100svh - var(--header-h));
+    min-height: max(620px, calc(100svh - var(--header-h)));
+    display: grid;
+    align-items: end;
+    overflow: hidden;
+    background: radial-gradient(120% 80% at 70% 10%, color-mix(in srgb, var(--sky) 80%, white), var(--sky));
+    color: var(--hero-ink);
+    isolation: isolate;
+    transition:
+      background 0.6s,
+      color 0.6s;
+  }
+  :global([data-theme='blueprint']) .sun {
+    background: transparent;
+  }
+  .sun.is-dark {
+    --hero-ink: #f3f1ec;
+  }
+  .sun-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 1.2s var(--ease);
+  }
+  .sun-canvas.is-ready {
+    opacity: 1;
+  }
+  .sun-canvas :global(canvas) {
+    width: 100% !important;
+    height: 100% !important;
+    cursor: grab;
+    touch-action: pan-y;
+  }
+  .sun-canvas :global(canvas:active) {
+    cursor: grabbing;
+  }
+  .sun-overlay {
+    position: relative;
+    isolation: isolate;
+    padding-block: clamp(32px, 6vw, 72px);
+    pointer-events: none;
+  }
+  .sun-overlay :global(a),
+  .sun-overlay :global(button) {
+    pointer-events: auto;
+  }
+  .sun-overlay::before {
+    content: '';
+    position: absolute;
+    inset: -40vh -40vw -10vh -10vw;
+    z-index: -1;
+    background: radial-gradient(60% 70% at 20% 70%, color-mix(in srgb, var(--sky) 78%, transparent), transparent 70%);
+    pointer-events: none;
+    transition: background 0.6s;
+  }
+  :global([data-theme='blueprint']) .sun-overlay::before {
+    background: radial-gradient(60% 70% at 20% 70%, rgb(14 58 117 / 0.8), transparent 70%);
+  }
+  .sun-compass {
+    position: absolute;
+    top: 20px;
+    right: var(--gutter);
+    width: 48px;
+    height: 48px;
+    color: var(--hero-ink);
+    opacity: 0.8;
+  }
+  .sun-compass svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(var(--north, 0deg));
+  }
+  .sun-panel {
+    position: absolute;
+    right: var(--gutter);
+    bottom: clamp(24px, 5vw, 64px);
+    width: min(360px, calc(100% - 2 * var(--gutter)));
+    padding: 14px 16px 12px;
+    background: var(--glass);
+    color: var(--ink);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    backdrop-filter: blur(16px) saturate(1.3);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .sp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .sp-head .label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f5a524;
+    box-shadow: 0 0 0 4px rgb(245 165 36 / 0.25);
+  }
+  .sp-toggle {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    background: transparent;
+  }
+  .sun-panel.is-collapsed .sp-body {
+    display: none;
+  }
+  .sp-read {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    gap: 4px 14px;
+    margin: 12px 0 8px;
+  }
+  .sp-read dt {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .sp-read dd {
+    margin: 2px 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .sp-slider {
+    margin: 4px 0 10px;
+  }
+  .ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
+  .sp-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .sp-row .chip {
+    min-height: 32px;
+    padding: 4px 10px;
+  }
+  .sp-hint {
+    margin: 4px 0 0;
+    font-size: 0.62rem;
+  }
+  @media (max-width: 760px) {
+    .sun {
+      align-items: start;
+      min-height: max(640px, calc(100svh - var(--header-h)));
+    }
+    .sun-panel {
+      left: var(--gutter);
+      right: var(--gutter);
+      width: auto;
+      bottom: 16px;
+      padding: 10px 12px;
+    }
+    .sp-read {
+      grid-template-columns: repeat(3, auto);
+    }
+    .hide-s,
+    .sp-hint {
+      display: none;
+    }
+    .sun-compass {
+      top: auto;
+      bottom: 250px;
+      width: 40px;
+      height: 40px;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-sun]');
+  if (root) {
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      import('~/scripts/sun-study').then((m) => m.initSunStudy(root));
+    };
+    // Yalnızca alan görünürken ve tarayıcı boştayken yükle
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          const ric = (window as any).requestIdleCallback || ((fn: () => void) => setTimeout(fn, 200));
+          ric(start, { timeout: 1500 });
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    io.observe(root);
+    const collapseBtn = root.querySelector<HTMLElement>('[data-sun-collapse]');
+    // Küçük ekranlarda panel kapalı başlar; maket görünür kalsın
+    if (matchMedia('(max-width: 760px)').matches && collapseBtn) {
+      root.querySelector('[data-sun-panel]')!.classList.add('is-collapsed');
+      collapseBtn.setAttribute('aria-expanded', 'false');
+    }
+    collapseBtn?.addEventListener('click', (e) => {
+      const panel = root.querySelector('[data-sun-panel]')!;
+      const collapsed = panel.classList.toggle('is-collapsed');
+      (e.currentTarget as HTMLElement).setAttribute('aria-expanded', String(!collapsed));
+    });
+  }
+</script>

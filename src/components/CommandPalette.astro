@@ -1,0 +1,167 @@
+---
+import Icon from './Icon.astro';
+import { t, type Lang } from '~/i18n/ui';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const tr = t(lang);
+const labels = {
+  projects: tr('search.projects'),
+  pages: tr('search.pages'),
+  actions: tr('search.actions'),
+  posts: tr('nav.journal'),
+  empty: tr('search.empty'),
+  light: `${tr('theme.label')}: ${tr('theme.light')}`,
+  dark: `${tr('theme.label')}: ${tr('theme.dark')}`,
+  blueprint: `${tr('theme.label')}: ${tr('theme.blueprint')}`,
+  lang: tr('lang.switch'),
+  start: tr('nav.start'),
+};
+---
+
+<dialog class="palette" data-palette aria-label={tr('search.open')} data-labels={JSON.stringify(labels)}>
+  <div class="p-box">
+    <div class="p-input">
+      <Icon name="search" />
+      <input
+        type="search"
+        placeholder={tr('search.placeholder')}
+        aria-label={tr('search.placeholder')}
+        autocomplete="off"
+        spellcheck="false"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="palette-list"
+        aria-autocomplete="list"
+        data-palette-input
+      />
+      <kbd>esc</kbd>
+    </div>
+    <ul id="palette-list" class="p-list" role="listbox" data-palette-list></ul>
+    <div class="p-foot mono muted"><span><kbd>↑</kbd><kbd>↓</kbd> <kbd>↵</kbd> <kbd>esc</kbd></span><span>{tr('search.hint')}</span></div>
+  </div>
+</dialog>
+
+<style>
+  .palette {
+    width: min(640px, calc(100vw - 32px));
+    max-height: min(560px, calc(100dvh - 120px));
+    margin: 12vh auto auto;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .palette[open] {
+    animation: p-in 0.25s var(--ease-out);
+  }
+  .palette::backdrop {
+    background: rgb(10 10 10 / 0.35);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+  }
+  @keyframes p-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.99);
+    }
+  }
+  .p-box {
+    display: flex;
+    flex-direction: column;
+    max-height: inherit;
+  }
+  .p-input {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .p-input input {
+    flex: 1;
+    min-width: 0;
+    height: 56px;
+    border: 0;
+    background: transparent;
+    font-size: var(--step-1);
+    outline: none;
+  }
+  .p-input input::-webkit-search-cancel-button {
+    display: none;
+  }
+  kbd {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    padding: 2px 5px;
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    margin-right: 2px;
+  }
+  .p-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .p-list :global(.p-group) {
+    padding: 10px 10px 4px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .p-list :global([role='option']) {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .p-list :global([role='option'][aria-selected='true']) {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .p-list :global(.sw) {
+    width: 10px;
+    height: 10px;
+    flex: none;
+    background: var(--c, var(--line-strong));
+  }
+  .p-list :global(.pt) {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .p-list :global(.ps) {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    opacity: 0.65;
+    white-space: nowrap;
+  }
+  .p-list :global(.p-empty) {
+    padding: 24px 12px;
+    color: var(--ink-3);
+  }
+  .p-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 560px) {
+    .p-foot span:first-child {
+      display: none;
+    }
+  }
+</style>

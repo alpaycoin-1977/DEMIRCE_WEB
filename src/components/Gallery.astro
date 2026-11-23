@@ -1,0 +1,163 @@
+---
+/**
+ * Proje galerisi + tam ekran görüntüleyici (lightbox) + İlham panosu düğmeleri
+ */
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Icon from './Icon.astro';
+import { imageId } from '~/lib/images';
+import { t, type Lang } from '~/i18n/ui';
+
+interface Props {
+  slug: string;
+  title: string;
+  images: ImageMetadata[];
+  /** 00 kapak dahil olmak üzere gösterilecek indeksler */
+  indices: number[];
+  lang: Lang;
+  variant?: 'main' | 'diagrams';
+}
+const { slug, title, images, indices, lang, variant = 'main' } = Astro.props;
+const tr = t(lang);
+const items = await Promise.all(
+  indices.map(async (i, n) => {
+    const img = images[i];
+    const ratio = img.width / img.height;
+    const widths = [480, 800, 1200, 1600, 2000].filter((w) => w <= img.width);
+    if (!widths.length) widths.push(img.width);
+    const set = await Promise.all(widths.map((w) => getImage({ src: img, width: w, format: 'webp', quality: 78 })));
+    const srcset = set.map((s, k) => `${s.src} ${widths[k]}w`).join(', ');
+    const span = variant === 'main' && (ratio >= 1.9 || n % 5 === 0) ? 'wide' : ratio < 0.95 ? 'tall' : 'norm';
+    return { i, img, ratio, srcset, src: set[Math.min(1, set.length - 1)].src, full: set[set.length - 1].src, span, id: imageId(slug, i) };
+  }),
+);
+---
+
+<div class={`gallery gallery--${variant}`} data-gallery>
+  {
+    items.map((it, n) => (
+      <figure class={`g-item g-${it.span}`}>
+        <button type="button" class="g-open" data-lb-index={n} data-full={it.full} data-srcset={it.srcset} aria-label={`${title} — ${n + 1}/${items.length}`}>
+          <img
+            src={it.src}
+            srcset={it.srcset}
+            sizes={variant === 'diagrams' ? '(min-width: 900px) 25vw, 50vw' : it.span === 'wide' ? '(min-width: 900px) 90vw, 100vw' : '(min-width: 900px) 45vw, 100vw'}
+            width={it.img.width}
+            height={it.img.height}
+            alt={`${title} — ${lang === 'tr' ? 'görsel' : 'image'} ${n + 1}`}
+            loading="lazy"
+            decoding="async"
+            class="reveal-img"
+          />
+        </button>
+        {
+          variant === 'main' && (
+            <button type="button" class="heart" data-board-id={it.id} aria-pressed="false" aria-label={tr('board.add')} data-l-add={tr('board.add')} data-l-remove={tr('board.remove')}>
+              <Icon name="heart" size={18} />
+            </button>
+          )
+        }
+      </figure>
+    ))
+  }
+</div>
+
+<style>
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: dense;
+    gap: clamp(12px, 1.6vw, 24px);
+  }
+  .gallery--diagrams {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .g-item {
+    position: relative;
+    margin: 0;
+    background: var(--paper-2);
+    overflow: hidden;
+  }
+  .gallery--diagrams .g-item {
+    background: #fff;
+    border: 1px solid var(--line);
+  }
+  .g-wide {
+    grid-column: 1 / -1;
+  }
+  .g-tall {
+    grid-row: span 2;
+  }
+  .g-open {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+  .g-open img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s var(--ease-out);
+  }
+  .gallery--diagrams .g-open img {
+    object-fit: contain;
+    aspect-ratio: 4 / 3;
+  }
+  .g-open:hover img {
+    transform: scale(1.02);
+  }
+  .heart {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.9);
+    color: #151515;
+    opacity: 0;
+    transform: scale(0.9);
+    transition:
+      opacity 0.25s,
+      transform 0.25s var(--ease),
+      background 0.2s,
+      color 0.2s;
+  }
+  .g-item:hover .heart,
+  .heart:focus-visible,
+  .heart[aria-pressed='true'] {
+    opacity: 1;
+    transform: none;
+  }
+  @media (hover: none) {
+    .heart {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .heart[aria-pressed='true'] {
+    background: var(--accent);
+    color: #fff;
+  }
+  .heart[aria-pressed='true'] :global(svg) {
+    fill: currentColor;
+  }
+  @media (max-width: 700px) {
+    .gallery {
+      grid-template-columns: 1fr;
+    }
+    .gallery--diagrams {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .g-tall {
+      grid-row: auto;
+    }
+  }
+</style>

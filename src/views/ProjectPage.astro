@@ -1,0 +1,380 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '~/layouts/Base.astro';
+import Gallery from '~/components/Gallery.astro';
+import Lightbox from '~/components/Lightbox.astro';
+import ProjectCard from '~/components/ProjectCard.astro';
+import JournalCard from '~/components/JournalCard.astro';
+import Icon from '~/components/Icon.astro';
+import { projects, placeLabel, countryName, type Project } from '~/data/projects';
+import { projectImages } from '~/lib/images';
+import { ROUTES, t, projectUrl, type Lang } from '~/i18n/ui';
+import { brandSafe } from '~/lib/text';
+
+interface Props {
+  project: Project;
+  lang: Lang;
+}
+const { project: p, lang } = Astro.props;
+const tr = t(lang);
+const images = projectImages(p.slug);
+const cover = images[0];
+const diagramSet = new Set(p.diagrams ?? []);
+const mainIdx = images.map((_, i) => i).filter((i) => i > 0 && !diagramSet.has(i));
+const diagIdx = [...diagramSet].filter((i) => i < images.length);
+const i = projects.indexOf(p);
+const prev = projects[(i - 1 + projects.length) % projects.length];
+const next = projects[(i + 1) % projects.length];
+const related = projects.filter((x) => x !== p && x.categories[0] === p.categories[0]).slice(0, 3);
+const more = related.length >= 2 ? related : projects.filter((x) => x !== p && x.featured).slice(0, 3);
+const posts = (await getCollection('journal', (e) => e.id.startsWith(`${lang}/`) && e.data.project === p.slug)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const facts: [string, string][] = [
+  [tr('common.location'), p.city ? `${placeLabel(p, lang)} · ${countryName(p.country, lang)}` : countryName(p.country, lang)],
+  ...(p.year ? ([[tr('common.year'), String(p.year)]] as [string, string][]) : []),
+  [tr('common.category'), p.categories.map((c) => tr(`cat.${c}` as const)).join(', ')],
+  ...(p.client ? ([[tr('common.client'), p.client]] as [string, string][]) : []),
+  ...(p.status ? ([[tr('common.status'), p.status[lang]]] as [string, string][]) : []),
+  [tr('common.scope'), p.scope[lang].join(' · ')],
+];
+const ld = {
+  '@type': 'CreativeWork',
+  name: p.title[lang],
+  description: p.summary[lang],
+  genre: 'Architecture',
+  creator: { '@id': 'https://www.demirce.com/#ofis' },
+  ...(p.year ? { dateCreated: String(p.year) } : {}),
+  ...(p.city ? { locationCreated: { '@type': 'Place', name: placeLabel(p, lang), ...(p.coords ? { geo: { '@type': 'GeoCoordinates', latitude: p.coords[0], longitude: p.coords[1] } } : {}) } } : {}),
+  ...(p.award ? { award: p.award[lang] } : {}),
+  inLanguage: lang,
+};
+const crumbs = {
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: tr('nav.home'), item: new URL(ROUTES.home[lang], Astro.site).href },
+    { '@type': 'ListItem', position: 2, name: tr('nav.projects'), item: new URL(ROUTES.projects[lang], Astro.site).href },
+    { '@type': 'ListItem', position: 3, name: p.title[lang], item: new URL(projectUrl(p.slug, lang), Astro.site).href },
+  ],
+};
+const sheet = `A-${String(11 + i).padStart(2, '0')}`;
+const L =
+  lang === 'tr'
+    ? { gallery: 'Galeri', diagrams: 'Diyagramlar', news: 'Günlükte', more: 'Diğer projeler', identity: 'Kimlik rengi', boardHint: 'Görsellerdeki ♥ ile beğendiklerinizi ilham panonuza ekleyin.' }
+    : { gallery: 'Gallery', diagrams: 'Diagrams', news: 'In the journal', more: 'More projects', identity: 'Identity colour', boardHint: 'Use ♥ on images to add favourites to your mood board.' };
+---
+
+<Base
+  lang={lang}
+  title={p.title[lang]}
+  description={p.summary[lang]}
+  alternates={{ tr: projectUrl(p.slug, 'tr'), en: projectUrl(p.slug, 'en') }}
+  image={cover}
+  imageAlt={p.title[lang]}
+  sheet={sheet}
+  jsonLd={[ld, crumbs]}
+  accent={p.color}
+>
+  <article class="project" style={`--pc:${p.color}`}>
+    <header class="wrap p-head">
+      <nav class="crumbs mono muted" aria-label={lang === 'tr' ? 'Sayfa yolu' : 'Breadcrumb'}>
+        <a href={ROUTES.projects[lang]}>{tr('nav.projects')}</a> / <span aria-current="page" set:html={brandSafe(p.title[lang], lang)} />
+      </nav>
+      <div class="p-titlebar">
+        <h1 class="display" set:html={brandSafe(p.title[lang], lang)} />
+        {p.award && <p class="award label">★ {p.award[lang]}</p>}
+      </div>
+      <p class="lead p-summary">{p.summary[lang]}</p>
+    </header>
+
+    <div class="p-cover wrap">
+      <Image
+        src={cover}
+        alt={p.title[lang]}
+        widths={[640, 960, 1400, 2000].filter((w) => w <= cover.width).concat(cover.width < 640 ? [cover.width] : [])}
+        sizes="(min-width: 1680px) 1600px, 100vw"
+        loading="eager"
+        fetchpriority="high"
+        style={`view-transition-name: p-${p.slug}`}
+      />
+    </div>
+
+    <div class="wrap p-body">
+      <aside class="p-facts">
+        <dl class="facts">
+          {
+            facts.map(([k, v]) => (
+              <div>
+                <dt>{k}</dt>
+                <dd>{v}</dd>
+              </div>
+            ))
+          }
+          <div>
+            <dt>{L.identity}</dt>
+            <dd><span class="swatch" aria-hidden="true" /> <span class="mono">{p.color.toUpperCase()}</span></dd>
+          </div>
+        </dl>
+        <div class="p-actions">
+          <button type="button" class="btn btn--ghost" data-share data-copied={tr('common.copied')}><Icon name="share" size={16} />{tr('common.share')}</button>
+          <a class="btn btn--ghost" href={ROUTES.contact[lang] + `?proje=${encodeURIComponent(p.title[lang])}`}>{tr('nav.contact')}</a>
+        </div>
+      </aside>
+      <div class="prose p-text">
+        {p.body[lang].map((para) => (para.startsWith('## ') ? <h2>{para.slice(3)}</h2> : <p>{para}</p>))}
+      </div>
+    </div>
+
+    <section class="wrap p-gallery" aria-labelledby="galeri">
+      <header class="g-head">
+        <h2 id="galeri" class="label">{L.gallery} · {mainIdx.length}</h2>
+        <p class="mono muted">{L.boardHint}</p>
+      </header>
+      <Gallery slug={p.slug} title={p.title[lang]} images={images} indices={mainIdx} lang={lang} />
+      {
+        diagIdx.length > 0 && (
+          <>
+            <h2 class="label g-sub">
+              {L.diagrams} · {diagIdx.length}
+            </h2>
+            <Gallery slug={p.slug} title={`${p.title[lang]} — ${L.diagrams}`} images={images} indices={diagIdx} lang={lang} variant="diagrams" />
+          </>
+        )
+      }
+    </section>
+
+    {
+      posts.length > 0 && (
+        <section class="wrap p-news" aria-labelledby="haber">
+          <h2 id="haber" class="label">{L.news}</h2>
+          <div class="news-grid">
+            {posts.map((post) => (
+              <JournalCard post={post} lang={lang} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <nav class="wrap p-nav" aria-label={lang === 'tr' ? 'Proje gezinme' : 'Project navigation'}>
+      <a href={projectUrl(prev.slug, lang)} rel="prev" style={`--pc:${prev.color}`}>
+        <span class="label muted">← {tr('common.prev')}</span>
+        <span class="display" set:html={brandSafe(prev.title[lang], lang)} />
+      </a>
+      <a href={projectUrl(next.slug, lang)} rel="next" class="next" style={`--pc:${next.color}`}>
+        <span class="label muted">{tr('common.next')} →</span>
+        <span class="display" set:html={brandSafe(next.title[lang], lang)} />
+      </a>
+    </nav>
+
+    <section class="wrap p-more" aria-labelledby="diger">
+      <h2 id="diger" class="label">{L.more}</h2>
+      <div class="more-grid">
+        {more.map((m) => <ProjectCard project={m} lang={lang} size="s" />)}
+      </div>
+    </section>
+  </article>
+  <Lightbox lang={lang} />
+</Base>
+
+<style>
+  .p-head {
+    padding-block: clamp(32px, 6vw, 80px) clamp(24px, 3vw, 40px);
+  }
+  .crumbs a {
+    text-decoration: none;
+  }
+  .crumbs a:hover {
+    color: var(--accent-text);
+  }
+  .p-titlebar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px 32px;
+    margin: 20px 0 24px;
+    padding-bottom: 20px;
+    border-bottom: 4px solid var(--pc);
+  }
+  .p-titlebar h1 {
+    font-size: var(--step-5);
+  }
+  .award {
+    padding: 8px 12px;
+    background: var(--pc);
+    color: #fff;
+    margin: 0;
+  }
+  .p-summary {
+    max-width: 60ch;
+  }
+  .p-cover {
+    padding-inline: 0;
+    max-width: calc(var(--maxw) - 2 * var(--gutter));
+  }
+  @media (min-width: 1100px) {
+    .p-cover {
+      padding-inline: var(--gutter);
+      max-width: var(--maxw);
+    }
+  }
+  .p-cover :global(img) {
+    width: 100%;
+    max-height: 86vh;
+    object-fit: cover;
+  }
+  .p-body {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+    gap: clamp(32px, 6vw, 96px);
+    padding-block: clamp(48px, 7vw, 112px);
+  }
+  .p-facts {
+    align-self: start;
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+  .facts {
+    margin: 0 0 24px;
+    border: 1px solid var(--line-strong);
+  }
+  .facts > div {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 12px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--line);
+  }
+  .facts > div:first-child {
+    border-top: 0;
+  }
+  .facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding-top: 3px;
+  }
+  .facts dd {
+    margin: 0;
+    font-size: var(--step--1);
+  }
+  .swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background: var(--pc);
+    vertical-align: -2px;
+  }
+  .p-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .p-text {
+    font-size: var(--step-1);
+    line-height: 1.55;
+  }
+  .p-text :global(p:first-child) {
+    color: var(--ink);
+  }
+  .p-gallery {
+    padding-bottom: clamp(48px, 7vw, 112px);
+  }
+  .g-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 24px;
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .g-head h2,
+  .g-sub {
+    margin: 0;
+  }
+  .g-head p {
+    margin: 0;
+  }
+  .g-sub {
+    margin: clamp(32px, 5vw, 64px) 0 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .p-news {
+    padding-bottom: clamp(48px, 7vw, 96px);
+  }
+  .p-news h2,
+  .p-more h2 {
+    padding-bottom: 14px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .news-grid,
+  .more-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(16px, 2vw, 32px);
+  }
+  .p-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-block: 1px solid var(--line);
+    margin-bottom: clamp(48px, 7vw, 96px);
+  }
+  .p-nav a {
+    display: grid;
+    gap: 10px;
+    padding: clamp(24px, 4vw, 56px) 0;
+    text-decoration: none;
+    position: relative;
+  }
+  .p-nav .next {
+    text-align: right;
+    border-left: 1px solid var(--line);
+  }
+  .p-nav a:not(.next) {
+    padding-right: 24px;
+  }
+  .p-nav .next {
+    padding-left: 24px;
+  }
+  .p-nav .display {
+    font-size: var(--step-3);
+    transition: color 0.3s;
+  }
+  .p-nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 3px;
+    background: var(--pc);
+    transform: scaleX(0);
+    transition: transform 0.45s var(--ease-out);
+  }
+  .p-nav a:hover::after {
+    transform: scaleX(1);
+  }
+  @media (max-width: 900px) {
+    .p-body {
+      grid-template-columns: 1fr;
+    }
+    .p-facts {
+      position: static;
+      order: 2;
+    }
+    .news-grid,
+    .more-grid {
+      grid-template-columns: 1fr;
+    }
+    .p-nav .display {
+      font-size: var(--step-2);
+    }
+  }
+</style>

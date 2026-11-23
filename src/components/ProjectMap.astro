@@ -1,0 +1,270 @@
+---
+/**
+ * Proje haritası — derleme anında d3-geo ile üretilen statik SVG.
+ * Üçüncü taraf harita servisi / çerez yoktur (KVKK dostu).
+ */
+import { geoMercator, geoPath, geoGraticule } from 'd3-geo';
+import { feature } from 'topojson-client';
+import topo from 'world-atlas/countries-50m.json';
+import { projects, type Project } from '~/data/projects';
+import { SITE } from '~/data/site';
+import { projectUrl, t, type Lang } from '~/i18n/ui';
+
+interface Props {
+  lang: Lang;
+  id?: string;
+}
+const { lang, id = 'harita' } = Astro.props;
+const tr = t(lang);
+
+const W = 1000;
+const H = 520;
+const bbox = {
+  type: 'Feature',
+  properties: {},
+  geometry: { type: 'Polygon', coordinates: [[[24.5, 34.6], [24.5, 48.6], [54.5, 48.6], [54.5, 34.6], [24.5, 34.6]]] },
+} as any;
+const proj = geoMercator().fitExtent([[10, 10], [W - 10, H - 10]], bbox).clipExtent([[0, 0], [W, H]]);
+const path = geoPath(proj).digits(0);
+const fc = feature(topo as any, (topo as any).objects.countries) as any;
+const countries = fc.features
+  .map((f: any) => ({ name: f.properties.name as string, d: path(f) as string }))
+  .filter((c: any) => c.d && c.d.length > 10);
+const grat = path(geoGraticule().step([5, 5])() as any) ?? '';
+
+// Projeleri şehre göre grupla
+type Group = { key: string; label: string; x: number; y: number; items: Project[]; office?: boolean; left?: boolean };
+const groups = new Map<string, Group>();
+for (const p of projects) {
+  if (!p.city) continue;
+  const key = p.city.tr;
+  const coords = key === 'İzmir' ? [SITE.geo.lat, SITE.geo.lon] : p.coords;
+  if (!coords) continue;
+  if (!groups.has(key)) {
+    const [x, y] = proj([coords[1], coords[0]])!;
+    groups.set(key, { key, label: p.district && key !== 'İzmir' ? `${p.district[lang]}` : p.city[lang], x, y, items: [], office: key === 'İzmir', left: key === 'Aydın' });
+  }
+  groups.get(key)!.items.push(p);
+}
+const list = [...groups.values()];
+const slug = (s: string) => s.toLocaleLowerCase('tr').replace(/[^a-z0-9]+/gi, '-');
+---
+
+<div class="pmap" id={id}>
+  <svg viewBox={`0 0 ${W} ${H}`} class="pmap-svg" role="img" aria-labelledby={`${id}-title`}>
+    <title id={`${id}-title`}>{lang === 'tr' ? 'Proje konumları haritası' : 'Map of project locations'}</title>
+    <path d={grat} class="grat" />
+    {countries.map((c: any) => <path d={c.d} class={c.name === 'Turkey' ? 'land tr' : c.name === 'Kazakhstan' ? 'land kz' : 'land'} />)}
+  </svg>
+
+  {
+    list.map((g) => (
+      <>
+        <button
+          type="button"
+          class={`pin ${g.office ? 'pin--office' : ''} ${g.left ? 'pin--left' : ''}`}
+          style={`left:${(g.x / W) * 100}%;top:${(g.y / H) * 100}%`}
+          popovertarget={`pop-${id}-${slug(g.key)}`}
+          aria-label={`${g.label}: ${g.items.length} ${lang === 'tr' ? 'proje' : g.items.length > 1 ? 'projects' : 'project'}`}
+        >
+          <span class="pin-dot" />
+          <span class="pin-label mono">
+            {g.label} <b>{g.items.length}</b>
+          </span>
+        </button>
+        <div id={`pop-${id}-${slug(g.key)}`} popover class="pin-pop" data-anchor-x={g.x / W} data-anchor-y={g.y / H}>
+          <p class="label muted">
+            {g.label}
+            {g.office && ` · ${lang === 'tr' ? 'Ofisimiz burada' : 'Our studio is here'}`}
+          </p>
+          <ul>
+            {g.items.map((p) => (
+              <li>
+                <a href={projectUrl(p.slug, lang)} style={`--pc:${p.color}`}>
+                  <span class="sw" />
+                  <span>{p.title[lang]}</span>
+                  <span class="mono muted">{p.categories.slice(0, 2).map((c) => tr(`cat.${c}` as const)).join(' · ')}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </>
+    ))
+  }
+  <p class="pmap-legend mono muted">
+    <span><i class="lg lg-office"></i>{lang === 'tr' ? 'Ofis — Alsancak, İzmir' : 'Studio — Alsancak, İzmir'}</span>
+    <span><i class="lg"></i>{lang === 'tr' ? 'Proje konumu (sayı = proje adedi)' : 'Project location (number = projects)'}</span>
+  </p>
+</div>
+
+<style>
+  .pmap {
+    position: relative;
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .pmap-svg {
+    width: 100%;
+    height: auto;
+  }
+  .grat {
+    fill: none;
+    stroke: var(--line);
+    stroke-dasharray: 2 4;
+  }
+  .land {
+    fill: var(--paper-2);
+    stroke: var(--line-strong);
+    stroke-width: 0.6;
+  }
+  .land.tr,
+  .land.kz {
+    fill: var(--paper-3);
+    stroke: var(--ink-3);
+  }
+  .pin {
+    position: absolute;
+    transform: translate(-7px, -7px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+  }
+  .pin--left {
+    flex-direction: row-reverse;
+    transform: translate(calc(-100% + 7px), -7px);
+  }
+  .pin-dot {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 3px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--ink);
+    transition: transform 0.25s var(--ease);
+  }
+  .pin--office .pin-dot {
+    background: var(--accent);
+    box-shadow:
+      0 0 0 1px var(--accent),
+      0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent);
+    animation: pulse 2.4s infinite;
+  }
+  @keyframes pulse {
+    70% {
+      box-shadow:
+        0 0 0 1px var(--accent),
+        0 0 0 16px transparent;
+    }
+    100% {
+      box-shadow:
+        0 0 0 1px var(--accent),
+        0 0 0 0 transparent;
+    }
+  }
+  .pin-label {
+    padding: 2px 6px;
+    background: var(--paper);
+    border: 1px solid var(--line-strong);
+    font-size: 0.66rem;
+    white-space: nowrap;
+  }
+  .pin-label b {
+    color: var(--accent-text);
+    font-weight: 600;
+  }
+  .pin:hover .pin-dot,
+  .pin:focus-visible .pin-dot {
+    transform: scale(1.3);
+  }
+  .pin-pop {
+    margin: 0;
+    width: min(340px, calc(100vw - 32px));
+    padding: 14px;
+    border: 1px solid var(--line-strong);
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+  }
+  .pin-pop ul {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+  }
+  .pin-pop a {
+    display: grid;
+    grid-template-columns: 10px 1fr;
+    column-gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+    text-decoration: none;
+  }
+  .pin-pop a:hover span:nth-child(2) {
+    color: var(--accent-text);
+  }
+  .pin-pop .sw {
+    grid-row: span 2;
+    width: 10px;
+    height: 10px;
+    margin-top: 6px;
+    background: var(--pc);
+  }
+  .pin-pop .mono {
+    font-size: 0.66rem;
+  }
+  .pmap-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin: 0;
+    padding: 12px 14px;
+    border-top: 1px solid var(--line);
+  }
+  .lg {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ink);
+    margin-right: 8px;
+    vertical-align: -1px;
+  }
+  .lg-office {
+    background: var(--accent);
+  }
+  @media (max-width: 640px) {
+    .pin-label {
+      display: none;
+    }
+    .pin--office .pin-label {
+      display: inline;
+    }
+  }
+</style>
+
+<script>
+  // Popover'ı işaretçinin yanına konumlandır
+  document.querySelectorAll<HTMLElement>('.pin-pop').forEach((pop) => {
+    pop.addEventListener('toggle', (e: any) => {
+      if (e.newState !== 'open') return;
+      const btn = document.querySelector<HTMLElement>(`[popovertarget="${pop.id}"]`);
+      if (!btn) return;
+      const r = btn.getBoundingClientRect();
+      const pw = pop.offsetWidth;
+      const ph = pop.offsetHeight;
+      let left = r.left + 20;
+      let top = r.top - 8;
+      if (left + pw > innerWidth - 12) left = Math.max(12, r.left - pw - 8);
+      if (top + ph > innerHeight - 12) top = Math.max(12, innerHeight - ph - 12);
+      pop.style.position = 'fixed';
+      pop.style.left = `${left}px`;
+      pop.style.top = `${top}px`;
+    });
+  });
+  addEventListener('scroll', () => document.querySelectorAll<HTMLElement>('.pin-pop:popover-open').forEach((p) => p.hidePopover()), { passive: true });
+</script>
