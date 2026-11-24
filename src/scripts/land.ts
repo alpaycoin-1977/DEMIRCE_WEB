@@ -88,7 +88,7 @@ export function mountLand(host: HTMLElement) {
     const px = img.data;
     for (let i = 0; i < px.length; i += 4) {
       let l = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
-      l = (l - 128) * 1.4 + 112;
+      l = (l - 128) * 1.2 + 122;
       l = l < 0 ? 0 : l > 255 ? 255 : l;
       px[i] = px[i + 1] = px[i + 2] = l;
     }
@@ -123,11 +123,17 @@ export function mountLand(host: HTMLElement) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
-    ctx.fillStyle = paper;
-    ctx.fillRect(0, 0, target.width, target.height);
+    // Fotoğraflı arazi: fotoğraf her yerde tam görünür; eş yükselti eğrileri
+    // yalnızca çizgi olarak üstünden geçer (aralarda kâğıt/beyazlık yok)
+    const photoMode = cfg.ink === 'photo' && !!photoCanvas;
+    if (photoMode) ctx.drawImage(photoCanvas!, 0, 0);
+    else {
+      ctx.fillStyle = paper;
+      ctx.fillRect(0, 0, target.width, target.height);
+    }
 
     // Mürekkep: alanın eşiği aşan bölgeleri (fotoğraf ya da siyah)
-    if (cfg.ink !== 'none') {
+    if (!photoMode && cfg.ink !== 'none') {
       const mw = Math.ceil(W / 2);
       const mh = Math.ceil(H / 2);
       mask.width = mw;
@@ -176,7 +182,7 @@ export function mountLand(host: HTMLElement) {
     const sy = H / rows;
     segs.forEach((s, k) => {
       const major = k % 5 === 0;
-      ctx.globalAlpha = major ? 0.85 : 0.45;
+      ctx.globalAlpha = photoMode ? (major ? 0.7 : 0.32) : major ? 0.85 : 0.45;
       ctx.lineWidth = major ? 0.9 : 0.55;
       ctx.beginPath();
       for (let q = 0; q < s.length; q += 4) {
@@ -185,7 +191,7 @@ export function mountLand(host: HTMLElement) {
       }
       ctx.stroke();
     });
-    if (cfg.dots) {
+    if (cfg.dots && !photoMode) {
       ctx.globalAlpha = 0.85;
       for (let y = 8; y < H; y += 15) {
         for (let x = 8; x < W; x += 15) {
