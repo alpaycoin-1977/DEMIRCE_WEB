@@ -1,11 +1,10 @@
 ---
 import '~/styles/book.css';
-import displayWoff from '@fontsource-variable/saira/files/saira-latin-wdth-normal.woff2?url';
+import displayWoff from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
 import { getImage } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import type { ImageMetadata } from 'astro';
 import Logo from '~/components/Logo.astro';
-import Land from '~/components/Land.astro';
 import Figure from '~/components/Figure.astro';
 import { SITE } from '~/data/site';
 import { approach } from '~/data/approach';
@@ -118,8 +117,7 @@ const coords = formatCoords(SITE.geo.lat, SITE.geo.lon, lang);
     <link rel="apple-touch-icon" href={u('/apple-touch-icon.png')} />
     <link rel="manifest" href={u('/manifest.webmanifest')} />
     <noscript><style>@media (max-width: 900px) { .head-bar { height: auto !important; flex-wrap: wrap; padding-block: 14px; } .nav-btn { display: none !important; } .nav { width: 100%; margin: 0 !important; } .nav-panel { display: block !important; position: static !important; padding: 8px 0 0 !important; background: none !important; } .nav-panel ul { flex-direction: row !important; flex-wrap: wrap; gap: 4px 18px !important; } .nav-panel a { font: 600 0.6875rem/1.4 var(--sans) !important; letter-spacing: 0.12em !important; padding: 4px 0 !important; } .nav-panel .n, .nav-sign { display: none !important; } }</style></noscript>
-    <meta name="theme-color" content="#efeeea" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#e9e8e4" />
     <meta property="og:type" content={type} />
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:title" content={title ?? SITE.name} />
@@ -233,7 +231,6 @@ const coords = formatCoords(SITE.geo.lat, SITE.geo.lon, lang);
           </p>
         </section>
       </div>
-      <Land seed="demirce-alsancak-1999" class="foot-land" threshold={0.6} levels={26} hair={0.8} scale={1.9} />
       <div class="wrap foot-bar mono">
         <span>© {SITE.founded}–{year} DEMİRCE MİMARLIK</span>
         <a href={u(lang === 'tr' ? '/kvkk/' : '/en/privacy/')}>{T.privacy}</a>
@@ -488,11 +485,6 @@ const coords = formatCoords(SITE.geo.lat, SITE.geo.lon, lang);
         border-left: 5px solid transparent;
         border-right: 5px solid transparent;
         border-top: 8px solid currentColor;
-      }
-      @media (prefers-color-scheme: dark) {
-        .tree {
-          filter: invert(0.9);
-        }
       }
       @media (max-width: 640px) {
         .t2 {

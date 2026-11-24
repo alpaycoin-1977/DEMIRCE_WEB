@@ -11,7 +11,6 @@ import Book from '~/layouts/Book.astro';
 import Logo from '~/components/Logo.astro';
 import Name from '~/components/Name.astro';
 import Scales from '~/components/Scales.astro';
-import Spiral from '~/components/Spiral.astro';
 import Figure from '~/components/Figure.astro';
 import Vitruvius from '~/components/Vitruvius.astro';
 import { cases, ROMAN } from '~/data/cases';
@@ -103,6 +102,21 @@ const packD = pack(works, 13);
 const packM = pack(works.map((w) => ({ c: w.c >= 5 ? 4 : w.c, r: w.r })), 6);
 const boxVars = (d: Box, mo: Box) => `--x:${d.x};--y:${d.y};--c:${d.c};--r:${d.r};--mx:${mo.x};--my:${mo.y};--mc:${mo.c};--mr:${mo.r}`;
 
+// Paftanın kesikli ızgarası: Fibonacci aralıklı, yer yer çift çizgi
+const sheetGrid = (() => {
+  const xs = [0, 89, 233, 377, 466, 610, 754, 843, 987, 1131, 1220, 1364, 1508, 1597];
+  const ys = [0, 89, 144, 233, 322, 377, 466, 555, 610, 699, 788, 843, 932, 987];
+  let d = '';
+  xs.forEach((x, i) => {
+    d += `M${x} 0V1000`;
+    if (i % 4 === 2) d += `M${x + 7} 0V1000`;
+  });
+  ys.forEach((y, i) => {
+    d += `M0 ${y}H1600`;
+    if (i % 5 === 3) d += `M0 ${y + 6}H1600M0 ${y + 13}H1600`;
+  });
+  return d;
+})();
 const awards = timeline.filter((m) => m.kind === 'award').sort((a, b) => b.year - a.year);
 const index = indexGroups().flatMap((g) => g.items);
 const coords = formatCoords(SITE.geo.lat, SITE.geo.lon, lang);
@@ -113,6 +127,14 @@ const c =
   lang === 'tr'
     ? {
         facade: 'Cephe',
+        tag: 'Doğru soru, doğru zamanda',
+        a: 'Mimarlık',
+        b: 'İç mimarlık',
+        cc: 'Peyzaj',
+        b1: 'Oran, ışık ve tekrar üzerine kurulu.',
+        b2: 'DEMİRCE’de her proje bir soruyla başlar: arazi, güneş, rüzgâr ve insan.',
+        b3: '1999’dan bu yana İzmir’de; bir otel odasının detayından bir kent adasına kadar mimari, iç mekân ve peyzaj.',
+        b4: 'DEMİRCE daha yalın, daha kalıcı ve yerine ait bir mimarlığı savunur.',
         q1: 'Doğru soru,',
         q2: 'doğru zamanda.',
         statement: `DEMİRCE, ${SITE.founded}’dan bu yana İzmir’de çalışan bir mimarlık ofisidir. Bir otel odasının detayından bir kent adasına kadar her ölçekte; mimariyi, iç mekânı ve peyzajı tek bir düşünce altında ele alır.`,
@@ -141,6 +163,14 @@ const c =
       }
     : {
         facade: 'Elevation',
+        tag: 'The right question, at the right time',
+        a: 'Architecture',
+        b: 'Interiors',
+        cc: 'Landscape',
+        b1: 'Built on proportion, light and repetition.',
+        b2: 'At DEMİRCE every project begins with a question: land, sun, wind and people.',
+        b3: 'Since 1999 in İzmir; from the detail of a hotel room to a city block — architecture, interiors and landscape.',
+        b4: 'DEMİRCE stands for an architecture that is simpler, lasting and of its place.',
         q1: 'The right question,',
         q2: 'at the right time.',
         statement: `DEMİRCE is an architecture studio that has worked from İzmir since ${SITE.founded}. From the detail of a hotel room to a city block, it treats architecture, interiors and landscape as a single idea.`,
@@ -170,68 +200,34 @@ const c =
 ---
 
 <Book lang={lang} alternates={{ tr: '/', en: '/en/' }}>
-  <!-- +16,00 · Cephe -->
-  <section class="wrap hero" aria-labelledby="h-name">
-    <p class="sec-head" aria-hidden="true"><span class="n lv">+16,00</span><b>{c.facade}</b><span class="fill"></span><span class="note">DEMİRCE · ALSANCAK · {coords}</span></p>
-    <div class="wall">
-      <Spiral orient="land" class="w-spiral w-land" />
-      <Spiral orient="port" class="w-spiral w-port" />
-      <div class="w-text">
-        <h1 id="h-name" class="h-name">
+  <!-- +16,00 · Pafta (kapak) -->
+  <section class="poster" aria-labelledby="h-name">
+    <div class="sheet">
+      <svg class="sheet-grid" viewBox="0 0 1600 1000" preserveAspectRatio="none" aria-hidden="true">
+        <path d={sheetGrid} fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4" vector-effect="non-scaling-stroke" />
+      </svg>
+      <p class="pb b-handle">DEMİRCE®<br /><span lang="en">@DEMIRCE_NORMS</span></p>
+      <p class="pb blk b1">{c.b1}</p>
+      <p class="pb blk b2">{c.b2}</p>
+      <p class="pb b-web">DEMİRCE®<br /><span lang="en">WWW.DEMIRCE.COM</span></p>
+      <div class="mark">
+        <span class="m-est">EST. {SITE.founded}</span>
+        <span class="m-tag">{c.tag}</span>
+        <h1 id="h-name" class="m-logo">
           <span class="sr-only">{SITE.name}</span>
           <span aria-hidden="true"><Logo variant="wordmark" /></span>
         </h1>
-        <p class="h-sub label">{lang === 'tr' ? 'Mimarlık · İç mimarlık · Peyzaj' : 'Architecture · Interiors · Landscape'}</p>
-        <p class="q h-q">{c.q1}<br />{c.q2}</p>
-        <p class="h-st">{c.statement}</p>
-        <div class="h-cta">
-          <a class="arrow-link" href={worksUrl}>{c.explore}</a>
-          <a class="h-office label" href={officeUrl}>{c.office}</a>
-        </div>
+        <span class="m-a">{c.a}</span>
+        <span class="m-b">{c.b}</span>
+        <span class="m-c">{c.cc}</span>
       </div>
-      <a class="slit" href={projectUrl(leads[0].cs.slug, lang)} data-slit>
-        {
-          leads.map((l) => (
-            <Image src={l.img} alt={l.p.title[lang]} widths={[360, 640].filter((w) => w <= l.img.width)} sizes="(min-width: 960px) 16vw, 30vw" loading={l.i === 0 ? 'eager' : 'lazy'} data-win={l.i} hidden={l.i !== 0} />
-          ))
-        }
-      </a>
-      <img src={u('/art/cam-4.svg')} alt="" class="w-tree" width="600" height="1000" aria-hidden="true" />
-      <Figure pose="walk" class="w-fig" />
-      <span class="w-level mono" aria-hidden="true">±0,00</span>
+      <div class="pb b3">
+        <p class="blk">{c.b3}</p>
+        <a class="b-cta" href={worksUrl}>{c.explore} ↗</a>
+      </div>
+      <p class="pb blk b4">{c.b4}</p>
+      <p class="pb b-coord">DEMİRCE · ALSANCAK<br />{coords}</p>
     </div>
-    <div class="h-cap">
-      {
-        leads.map((l) => (
-          <p data-cap={l.i} hidden={l.i !== 0}>
-            <span class="mono muted">
-              {c.window} — {ROMAN[l.i]} / {ROMAN[cases.length - 1]}
-            </span>
-            <a href={projectUrl(l.cs.slug, lang)} class="cap-name">
-              <Name text={l.p.title[lang]} lang={lang} />
-            </a>
-            <span class="q cap-q">{l.cs.question[lang]}</span>
-          </p>
-        ))
-      }
-      <span class="cap-note mono muted">{c.note}</span>
-    </div>
-    <script is:inline define:vars={{ n: cases.length, urls: leads.map((l) => projectUrl(l.cs.slug, lang)) }}>
-      (function () {
-        var d = new Date();
-        var k = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5) % n;
-        if (!k) return;
-        document.querySelectorAll('[data-win]').forEach(function (el, i) {
-          el.hidden = i !== k;
-          if (i === k) el.loading = 'eager';
-        });
-        document.querySelectorAll('[data-cap]').forEach(function (el, i) {
-          el.hidden = i !== k;
-        });
-        var a = document.querySelector('[data-slit]');
-        if (a) a.href = urls[k];
-      })();
-    </script>
   </section>
 
   <!-- +12,80 · Derinlemesine: pencereler -->
@@ -350,219 +346,156 @@ const c =
 </Book>
 
 <style>
-  /* ---------- +16,00 Cephe ---------- */
-  .hero {
-    padding-top: clamp(24px, 3vw, 40px);
-  }
-  .hero .sec-head {
-    margin-bottom: 20px;
-  }
-  .wall {
+  /* ---------- Pafta (kapak) ---------- */
+  .poster {
     position: relative;
-    aspect-ratio: 1.618 / 1;
-    width: 100%;
-    background-color: var(--wall);
-    background-image:
-      radial-gradient(120% 90% at 18% 8%, rgb(255 255 255 / 0.35), transparent 60%),
-      linear-gradient(to bottom, transparent 55%, rgb(0 0 0 / 0.08)),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .32 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    border-bottom: 3px solid var(--ink);
+    height: calc(100svh - var(--header-h));
+    min-height: 620px;
     overflow: hidden;
-    color: var(--ink);
   }
-  .wall :global(.w-spiral) {
+  .sheet {
+    position: absolute;
+    inset: -6% -4%;
+    background-color: var(--paper);
+    background-image: var(--linen);
+    transform: rotate(-2.4deg);
+    transform-origin: 50% 50%;
+  }
+  .sheet-grid {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    color: var(--ink);
-    opacity: 0.42;
-    pointer-events: none;
+    color: rgb(0 0 0 / 0.3);
   }
-  .wall :global(.w-port) {
-    display: none;
-  }
-  /* Metin: ilk altın karede (duvarın sol %61,8'i) */
-  .w-text {
+  .pb {
     position: absolute;
-    left: 4.2%;
-    top: 7%;
-    width: 52%;
-    z-index: 2;
+    margin: 0;
+    font-size: var(--t-s);
+    font-weight: 500;
+    line-height: 1.45;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
-  .h-name {
+  .b-handle {
+    left: 27%;
+    top: 9%;
+  }
+  .b1 {
+    left: 6%;
+    top: 24%;
+    width: 17ch;
+  }
+  .b2 {
+    left: 52%;
+    top: 29%;
+    width: 19ch;
+  }
+  .b-web {
+    left: 85%;
+    top: 34%;
+  }
+  .b3 {
+    left: 12%;
+    top: 72%;
+    width: 22ch;
+  }
+  .b3 .blk {
+    margin: 0 0 18px;
+  }
+  .b-cta {
+    display: inline-block;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+  }
+  .b4 {
+    left: 74%;
+    top: 79%;
+    width: 21ch;
+  }
+  .b-coord {
+    left: 38%;
+    top: 91%;
+  }
+  .mark {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    width: min(46%, 700px);
+    transform: translate(-50%, -50%);
+  }
+  .m-logo {
     margin: 0;
     line-height: 0;
   }
-  .h-name :global(.logo) {
+  .m-logo :global(.logo) {
     width: 100%;
     height: auto;
   }
-  .h-sub {
-    margin: 14px 0 0;
-    color: var(--ink-2);
-  }
-  .h-q {
-    font-size: clamp(2rem, 0.9rem + 3vw, 4.2rem);
-    line-height: 0.98;
-    margin: clamp(28px, 4vw, 64px) 0 clamp(14px, 1.6vw, 22px);
-  }
-  .h-st {
-    max-width: 30em;
-    color: var(--ink-2);
+  .mark > span {
+    position: absolute;
     font-size: var(--t-s);
-    margin-bottom: 24px;
-  }
-  .h-cta {
-    display: flex;
-    align-items: center;
-    gap: 28px;
-  }
-  .h-office {
-    text-decoration: none;
-    color: var(--ink-2);
-  }
-  /* Dar pencere: altın spiralin gözünde (x = y = 0,7236) */
-  .slit {
-    position: absolute;
-    left: calc(72.36% - 4.5%);
-    width: 9%;
-    top: 9%;
-    bottom: 9%;
-    display: block;
-    background: #1a1a1a;
-    outline: 3px solid #2a2a2a;
-    box-shadow:
-      inset 0 0 0 1px rgb(255 255 255 / 0.08),
-      12px 0 24px -12px rgb(0 0 0 / 0.35);
-    z-index: 1;
-  }
-  .slit::after {
-    /* Denizlik */
-    content: '';
-    position: absolute;
-    left: -6px;
-    right: -6px;
-    bottom: -12px;
-    height: 9px;
-    background: color-mix(in srgb, var(--wall) 70%, #fff);
-    box-shadow: 0 3px 6px rgb(0 0 0 / 0.2);
-  }
-  .slit :global(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: grayscale(1) contrast(1.08);
-    transition: transform 2s var(--ease);
-  }
-  .slit:hover :global(img) {
-    transform: scale(1.04);
-  }
-  .w-tree {
-    position: absolute;
-    right: -1.5%;
-    bottom: 0;
-    height: 92%;
-    width: auto;
-    z-index: 2;
-    pointer-events: none;
-    filter: none;
-  }
-  .wall :global(.w-fig) {
-    position: absolute;
-    bottom: 0;
-    left: 58%;
-    height: 9.5%;
-    z-index: 2;
-  }
-  .w-level {
-    position: absolute;
-    left: 4.2%;
-    bottom: 10px;
-    color: var(--ink-2);
-  }
-  .w-level::before {
-    content: '';
-    display: inline-block;
-    margin-right: 8px;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 8px solid currentColor;
-  }
-  .h-cap {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr);
-    gap: 8px 32px;
-    padding-top: 14px;
-  }
-  .h-cap p {
-    display: grid;
-    gap: 3px;
-    margin: 0;
-  }
-  .h-cap .mono {
+    font-weight: 500;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
+    white-space: nowrap;
   }
-  .cap-name {
-    font-family: var(--display);
-    font-stretch: 68%;
-    font-weight: 560;
-    font-size: 1.35rem;
-    line-height: 1;
-    text-transform: uppercase;
-    text-decoration: none;
+  .m-est {
+    left: 0;
+    bottom: calc(100% + 10px);
   }
-  .cap-q {
-    font-size: 1.05rem;
-    color: var(--ink-2);
+  .m-tag {
+    right: 0;
+    bottom: calc(100% + 14px);
   }
-  .cap-note {
-    align-self: end;
-    text-transform: none !important;
+  .m-a {
+    left: 1%;
+    top: calc(100% + 10px);
   }
-  @media (prefers-color-scheme: dark) {
-    .w-tree {
-      filter: invert(0.9);
-    }
+  .m-b {
+    left: 46%;
+    top: calc(100% + 6px);
   }
-  @media (max-width: 960px) {
-    .wall {
-      aspect-ratio: 1 / 1.618;
+  .m-c {
+    right: 0;
+    top: calc(100% + 2px);
+  }
+  @media (max-width: 860px) {
+    .poster {
+      height: auto;
+      min-height: 0;
+      overflow: hidden;
     }
-    .wall :global(.w-land) {
-      display: none;
+    .sheet {
+      position: relative;
+      inset: auto;
+      transform: rotate(-2deg);
+      margin: 24px -8% 40px;
+      padding: 40px calc(8% + var(--gutter) + 8px) 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 34px;
     }
-    .wall :global(.w-port) {
-      display: block;
+    .pb,
+    .mark {
+      position: relative;
+      left: auto;
+      top: auto;
+      right: auto;
+      transform: none;
     }
-    /* Dikey altın dikdörtgen: metin üstteki karede, pencere spiralin gözünde (x 0,276 · y 0,7236) */
-    .w-text {
-      left: 6%;
-      top: 4%;
-      width: 88%;
+    .mark {
+      width: 100%;
+      margin: 42px 0 52px;
     }
-    .h-q {
-      margin-top: 20px;
+    .b2,
+    .b4,
+    .b-web {
+      align-self: flex-end;
     }
-    .h-st {
-      display: none;
-    }
-    .slit {
-      left: calc(27.64% - 9%);
-      width: 18%;
-      top: 52%;
-      bottom: 6%;
-    }
-    .w-tree {
-      height: 52%;
-      right: 0;
-    }
-    .wall :global(.w-fig) {
-      left: 50%;
-      height: 6%;
-    }
-    .h-cap {
-      grid-template-columns: 1fr;
+    .m-b {
+      left: 40%;
     }
   }
 

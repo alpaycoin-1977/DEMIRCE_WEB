@@ -2,9 +2,11 @@
 
 DEMİRCE Mimarlık'ın yeni web sitesi. Eski WordPress sitesindeki projeler, metinler, görseller ve yazılar taşındı; site sıfırdan, hızlı, iki dilli (TR/EN) ve bakımı kolay bir statik site olarak yeniden tasarlandı.
 
-## Kavram — “Cephe”
+## Kavram — “Pafta”
 
-Site tek bir binanın **iki boyutlu görünüşü** (cephe paftası) gibi okunur. Tamamen gri tonlamalıdır.
+Site, kesikli çizgili bir ızgaranın üzerine yerleştirilmiş bir pafta gibi okunur: keten dokulu kâğıt, Fibonacci aralıklı (233 × 144) kesikli ızgara, tek yazı tipi (JetBrains Mono), büyük harf ve iki yana yaslı küçük metin blokları. Kapak hafifçe dönük bir paftadır; ortada DEMİRCE logosu, çevresinde etiketler ve dağınık bloklar. Tamamen gri tonlamalıdır.
+
+Önceki “Cephe” kurgusu korunur: bölümler kot işaretiyle başlar (▽ +12,80 → ±0,00), zeminde kodla çizilen çamlar ve insanlar vardır; Ofis bölümünde Vitruvius, inceleme görsellerinde altın spiral (yalnızca çizgi) yer alır.
 
 - **Çatıdan zemine:** Her bölüm bir kattır ve kot işaretiyle başlar (▽ +16,00 → +3,20). Sayfanın sonunda zemin (±0,00) vardır: kodla çizilen çam ağaçları ve yürüyen insanlar. Zeminin altında, kesit gibi, ofisin arazisi (eş yükselti eğrileri) durur.
 - **Fibonacci / altın oran (φ):** Kapaktaki duvar bir altın dikdörtgendir; dar pencere altın spiralin gözüne oturur ve her gün başka bir çalışma o pencereden görünür. İç sayfa başlıklarındaki siyah / taranmış dikdörtgen kompozisyonlar altın bölünmeden üretilir ve sayfa adına göre her seferinde aynı çıkar (`src/lib/geometry.ts`).
