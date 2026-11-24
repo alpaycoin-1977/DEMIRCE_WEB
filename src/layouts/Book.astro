@@ -19,8 +19,10 @@ interface Props {
   /** Başlıkta ortada görünen "akan başlık" (kitaplardaki gibi) */
   running?: string;
   noindex?: boolean;
+  /** Ana sayfada logo gazete başlığında durur; üst çubukta gizlenir */
+  hideBrand?: boolean;
 }
-const { lang, title, description, alternates, image, type = 'website', jsonLd = [], running, noindex } = Astro.props;
+const { lang, title, description, alternates, image, type = 'website', jsonLd = [], running, noindex, hideBrand = false } = Astro.props;
 const T = {
   tr: {
     works: 'Çalışmalar',
@@ -28,6 +30,7 @@ const T = {
     notes: 'Notlar',
     contact: 'İletişim',
     tagline: 'Mimarlık · İç mimarlık · Peyzaj — İzmir, 1999’dan beri',
+    short: 'Mimarlık · İç mimarlık · Peyzaj',
     desc: "DEMİRCE, 1999'dan bu yana İzmir'de çalışan bir mimarlık ofisi. Bir otel odasının detayından bir kentsel dönüşüm adasına kadar mimari, iç mekân ve peyzaj.",
     skip: 'İçeriğe geç',
     menu: 'Menü',
@@ -39,6 +42,7 @@ const T = {
     notes: 'Notes',
     contact: 'Contact',
     tagline: 'Architecture · Interiors · Landscape — İzmir, since 1999',
+    short: 'Architecture · Interiors · Landscape',
     desc: 'DEMİRCE is an architecture studio working from İzmir since 1999 — from the detail of a hotel room to an urban regeneration block: architecture, interiors and landscape.',
     skip: 'Skip to content',
     menu: 'Menu',
@@ -116,7 +120,7 @@ const year = new Date().getFullYear();
     <a class="skip" href="#icerik">{T.skip}</a>
     <header class="site-head">
       <div class="wrap head-bar">
-        <a href={home} class="brand" aria-label={`${SITE.name}`}><Logo variant="full" /></a>
+        {hideBrand ? <span class="small muted brand-text">{T.short}</span> : <a href={home} class="brand" aria-label={`${SITE.name}`}><Logo variant="full" /></a>}
         {running && <span class="running small muted" aria-hidden="true">{running}</span>}
         <nav class="nav" aria-label={T.menu}>
           <button type="button" class="nav-btn small" aria-expanded="false" aria-controls="nav-list">{T.menu}</button>
@@ -188,6 +192,12 @@ const year = new Date().getFullYear();
       .brand :global(.logo) {
         height: 19px;
         width: auto;
+      }
+      .brand-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
       }
       .running {
         margin-inline: auto;
@@ -299,6 +309,14 @@ const year = new Date().getFullYear();
       }
     </style>
     <script>
+      // Dokunmatik ekranlarda görsel ekranın ortasına gelince renklenir
+      if (matchMedia('(hover: none)').matches && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => entries.forEach((e) => e.target.classList.toggle('in-focus', e.isIntersecting)),
+          { rootMargin: '-38% 0px -38% 0px' },
+        );
+        document.querySelectorAll('main img').forEach((img) => io.observe(img));
+      }
       const nav = document.querySelector<HTMLElement>('.nav');
       const btn = nav?.querySelector<HTMLButtonElement>('.nav-btn');
       btn?.addEventListener('click', () => {

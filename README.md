@@ -18,7 +18,9 @@ Monografi, mimarlık yayıncılığında tek bir mimarın ya da ofisin işlerini
   3. *Rezidans gerçekte nedir?* — Borncity
   4. *Bir yapıya ikinci bir hayat nasıl verilir?* — İlayda Avantgarde Otel
   5. *Bir öğrenci için ev mi, otel mi?* — Coordinat Bornova
-- **Görünüm:** Newsreader (serif) + Inter; neredeyse tek renk, renk projelerden gelir. Ziyaretçinin sistemine göre otomatik açık/koyu görünüm. Ana sayfanın açılış görseli her gün bir incelemeye döner.
+- **Ana sayfa bir gazete ön sayfasıdır (broadsheet):** gazete başlığı ve tarih satırı, iki yanda “kulak”lar (ödüller, çalışılan yerler), manşette günün incelemesi (her gün değişir; devamı iç sayfada), yan sütunda diğer dört soru, ölçekler şeridi, “Ofisten / Notlar / Kayıt” sütunları, tek paragraflık dizin, kesitler ve en altta künye kutusu. Gazete formu her şeyi kısa ama yoğun gösterdiği için birikimi saymadan hissettirir.
+- **Siyah-beyaz arşiv:** tüm görseller gri tonlamalıdır; renk ilgiyle gelir — masaüstünde görselin üzerine gelince, telefonda görsel ekranın ortasındayken yavaşça renklenir. Farklı yıllarda, farklı ekiplerle üretilmiş görseller böylece tek bir arşiv gibi okunur.
+- **Görünüm:** Newsreader (serif) + Inter; arayüz tek renk. Ziyaretçinin sistemine göre otomatik açık/koyu görünüm.
 
 ## Teknik özellikler
 - **Hız:** Statik HTML, harici JavaScript dosyası yok (yalnızca birkaç küçük satır içi betik). Görseller derlemede WebP'ye çevrilip `srcset` ile boyutlandırılır; yazı tipleri siteden sunulur.
@@ -33,7 +35,7 @@ Monografi, mimarlık yayıncılığında tek bir mimarın ya da ofisin işlerini
 
 | TR | EN | İçerik |
 |---|---|---|
-| `/` | `/en/` | Açılış (günün görseli), ofis ifadesi, derinlemesine, ölçekler, kesitler, yerler, notlar |
+| `/` | `/en/` | Gazete ön sayfası: manşette günün incelemesi, diğer sorular, ölçekler, ofisten / notlar / kayıt, dizin, kesitler, künye |
 | `/projeler/` | `/en/projects/` | Derinlemesine incelemeler + dizin + kesitler |
 | `/projeler/<slug>/` | `/en/projects/<slug>/` | 5 inceleme (bölümler, numaralı şekiller, künye) veya sade “levha” sayfası |
 | `/ofis/` | `/en/studio/` | Ofis, çalışma biçimi, çalışma alanları, kurucular, kayıt (ödüller, yayınlar, sergiler) |

@@ -74,11 +74,6 @@ const { lang } = Astro.props;
     width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
-    filter: grayscale(0.25);
-    transition: filter 0.6s var(--ease);
-  }
-  a:hover :global(img) {
-    filter: none;
   }
   .note {
     font-size: var(--t-s);

@@ -73,6 +73,33 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+/* Siyah-beyaz arşiv: renk ilgiyle gelir.
+   Masaüstünde üzerine gelince, dokunmatik ekranda görsel ekranın ortasındayken. */
+img {
+  filter: grayscale(1);
+  transition: filter 0.9s var(--ease);
+}
+@media (hover: hover) {
+  a:hover img,
+  img:hover {
+    filter: grayscale(0);
+  }
+}
+img.in-focus,
+.in-focus img {
+  filter: grayscale(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  img {
+    transition: none;
+  }
+}
+@media print {
+  img {
+    filter: none;
+  }
+}
 a {
   color: inherit;
   text-decoration-thickness: 1px;
