@@ -1,11 +1,13 @@
 ---
-import ProjectPage from '~/views/ProjectPage.astro';
+import Case from '~/views/Case.astro';
+import Plate from '~/views/Plate.astro';
+import { getCase, type Case as CaseT } from '~/data/cases';
 import { projects, type Project } from '~/data/projects';
 
 export function getStaticPaths() {
-  return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+  return projects.map((project) => ({ params: { slug: project.slug }, props: { project, cs: getCase(project.slug) } }));
 }
-const { project } = Astro.props as { project: Project };
+const { project, cs } = Astro.props as { project: Project; cs?: CaseT };
 ---
 
-<ProjectPage project={project} lang="tr" />
+{cs ? <Case cs={cs} lang="tr" /> : <Plate project={project} lang="tr" />}

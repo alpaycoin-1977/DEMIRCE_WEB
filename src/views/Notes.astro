@@ -1,0 +1,97 @@
+---
+import { getCollection } from 'astro:content';
+import Book from '~/layouts/Book.astro';
+import { postUrl, formatDate, type Lang } from '~/i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const posts = (await getCollection('journal', (e) => e.id.startsWith(`${lang}/`) && !e.data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const years = [...new Set(posts.map((p) => p.data.date.getFullYear()))];
+const c = lang === 'tr' ? { title: 'Notlar', lead: 'Ödüller, yarışmalar, şantiyeler, sergiler ve mimarlık üzerine.' } : { title: 'Notes', lead: 'Awards, competitions, sites, exhibitions and thoughts on architecture.' };
+---
+
+<Book lang={lang} title={c.title} description={c.lead} alternates={{ tr: '/gunluk/', en: '/en/journal/' }}>
+  <header class="wrap head">
+    <h1>{c.title}</h1>
+    <p class="lead">{c.lead}</p>
+  </header>
+  <div class="wrap">
+    {
+      years.map((y) => (
+        <section class="year">
+          <h2 class="small muted">{y}</h2>
+          <ul>
+            {posts
+              .filter((p) => p.data.date.getFullYear() === y)
+              .map((p) => (
+                <li>
+                  <a href={postUrl(p.id.split('/')[1], lang)}>
+                    <span class="t">{p.data.title}</span>
+                    <span class="d">{p.data.description}</span>
+                    <time class="small muted" datetime={p.data.date.toISOString()}>
+                      {formatDate(p.data.date, lang)}
+                    </time>
+                  </a>
+                </li>
+              ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</Book>
+
+<style>
+  .head {
+    padding-block: clamp(56px, 9vw, 140px) clamp(40px, 5vw, 72px);
+  }
+  h1 {
+    font-size: var(--t-xxl);
+    margin-bottom: 20px;
+  }
+  .lead {
+    font-size: var(--t-l);
+    color: var(--ink-2);
+  }
+  .year {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) minmax(0, 4fr);
+    gap: 24px;
+    border-top: 1px solid var(--rule);
+    padding-top: 16px;
+    margin-bottom: 32px;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li a {
+    display: grid;
+    gap: 4px;
+    padding-bottom: 22px;
+    text-decoration: none;
+  }
+  .t {
+    font-size: var(--t-l);
+    line-height: 1.25;
+  }
+  li a:hover .t {
+    text-decoration: underline;
+    text-decoration-color: var(--rule-2);
+  }
+  .d {
+    color: var(--ink-2);
+    max-width: 40em;
+  }
+  @media (max-width: 700px) {
+    .year {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+</style>

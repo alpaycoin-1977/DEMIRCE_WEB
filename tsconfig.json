@@ -5,17 +5,13 @@
     "**/*"
   ],
   "exclude": [
-    "dist",
-    "dist-alt"
+    "dist"
   ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "~/*": [
         "src/*"
-      ],
-      "@alt/*": [
-        "alt/*"
       ]
     }
   }

@@ -1,0 +1,113 @@
+---
+/** DİZİN — tüm çalışmalar, tipolojiye göre; kitap sonundaki dizin gibi */
+import { getImage } from 'astro:assets';
+import { indexGroups } from '~/data/monograph';
+import { projectCover } from '~/lib/images';
+import { projectUrl, postUrl, type Lang } from '~/i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const groups = indexGroups();
+const thumbs: Record<string, string> = {};
+for (const g of groups)
+  for (const e of g.items)
+    if (e.slug) thumbs[e.slug] = (await getImage({ src: projectCover(e.slug), width: 420, format: 'webp', quality: 70 })).src;
+---
+
+<div class="index" data-index>
+  {
+    groups.map((g) => (
+      <section class="grp">
+        <h3 class="small gname">{g.name[lang]}</h3>
+        <ul>
+          {g.items.map((e) => {
+            const href = e.slug ? projectUrl(e.slug, lang) : e.post ? postUrl(e.post, lang) : undefined;
+            return (
+              <li>
+                {href ? (
+                  <a href={href} data-thumb={e.slug ? thumbs[e.slug] : undefined}>
+                    {e.name[lang]}
+                  </a>
+                ) : (
+                  <span>{e.name[lang]}</span>
+                )}
+                <span class="small muted">{[e.place?.[lang], e.year].filter(Boolean).join(' · ')}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    ))
+  }
+  <img class="peek" alt="" aria-hidden="true" data-peek />
+</div>
+
+<style>
+  .index {
+    columns: 3 280px;
+    column-gap: clamp(24px, 4vw, 64px);
+  }
+  .grp {
+    break-inside: avoid;
+    margin-bottom: 36px;
+  }
+  .gname {
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--muted);
+    font-weight: 450;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    display: grid;
+    padding: 6px 0;
+    line-height: 1.3;
+  }
+  li a,
+  li > span:first-child {
+    font-size: var(--t-m);
+    text-decoration: none;
+  }
+  li a {
+    text-decoration: underline;
+    text-decoration-color: var(--rule-2);
+  }
+  .peek {
+    position: fixed;
+    width: 240px;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 40;
+    transition: opacity 0.25s;
+  }
+  .peek.on {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  const idx = document.querySelector<HTMLElement>('[data-index]');
+  const peek = idx?.querySelector<HTMLImageElement>('[data-peek]');
+  if (idx && peek && matchMedia('(pointer: fine)').matches) {
+    idx.querySelectorAll<HTMLAnchorElement>('a[data-thumb]').forEach((a) => {
+      a.addEventListener('mouseenter', () => {
+        peek.src = a.dataset.thumb!;
+        peek.classList.add('on');
+      });
+      a.addEventListener('mouseleave', () => peek.classList.remove('on'));
+      a.addEventListener('mousemove', (e) => {
+        peek.style.left = `${e.clientX + 24}px`;
+        peek.style.top = `${e.clientY - 80}px`;
+      });
+    });
+  }
+</script>

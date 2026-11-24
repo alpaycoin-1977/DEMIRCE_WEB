@@ -1,0 +1,23 @@
+---
+import Book from '~/layouts/Book.astro';
+import PrivacyContent from '~/components/PrivacyContent.astro';
+import type { Lang } from '~/i18n/ui';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+---
+
+<Book lang={lang} title={lang === 'tr' ? 'KVKK' : 'Privacy'} alternates={{ tr: '/kvkk/', en: '/en/privacy/' }}>
+  <div class="wrap">
+    <h1>{lang === 'tr' ? 'KVKK ve gizlilik' : 'Privacy'}</h1>
+    <PrivacyContent lang={lang} />
+  </div>
+</Book>
+
+<style>
+  h1 {
+    font-size: var(--t-xxl);
+    padding-block: clamp(56px, 9vw, 140px) 40px;
+  }
+</style>

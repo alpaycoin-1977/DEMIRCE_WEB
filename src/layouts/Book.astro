@@ -1,0 +1,308 @@
+---
+import '~/styles/book.css';
+import serifWoff from '@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2?url';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Logo from '~/components/Logo.astro';
+import { SITE } from '~/data/site';
+import { projectCover } from '~/lib/images';
+import type { Lang } from '~/i18n/ui';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  alternates: { tr: string; en: string };
+  image?: ImageMetadata;
+  type?: 'website' | 'article';
+  jsonLd?: Record<string, unknown>[];
+  /** Başlıkta ortada görünen "akan başlık" (kitaplardaki gibi) */
+  running?: string;
+  noindex?: boolean;
+}
+const { lang, title, description, alternates, image, type = 'website', jsonLd = [], running, noindex } = Astro.props;
+const T = {
+  tr: {
+    works: 'Çalışmalar',
+    office: 'Ofis',
+    notes: 'Notlar',
+    contact: 'İletişim',
+    tagline: 'Mimarlık · İç mimarlık · Peyzaj — İzmir, 1999’dan beri',
+    desc: "DEMİRCE, 1999'dan bu yana İzmir'de çalışan bir mimarlık ofisi. Bir otel odasının detayından bir kentsel dönüşüm adasına kadar mimari, iç mekân ve peyzaj.",
+    skip: 'İçeriğe geç',
+    menu: 'Menü',
+    privacy: 'KVKK',
+  },
+  en: {
+    works: 'Works',
+    office: 'Studio',
+    notes: 'Notes',
+    contact: 'Contact',
+    tagline: 'Architecture · Interiors · Landscape — İzmir, since 1999',
+    desc: 'DEMİRCE is an architecture studio working from İzmir since 1999 — from the detail of a hotel room to an urban regeneration block: architecture, interiors and landscape.',
+    skip: 'Skip to content',
+    menu: 'Menu',
+    privacy: 'Privacy',
+  },
+}[lang];
+const base = lang === 'tr' ? '' : '/en';
+const nav = [
+  { href: lang === 'tr' ? '/projeler/' : '/en/projects/', label: T.works },
+  { href: lang === 'tr' ? '/ofis/' : '/en/studio/', label: T.office },
+  { href: lang === 'tr' ? '/gunluk/' : '/en/journal/', label: T.notes },
+  { href: lang === 'tr' ? '/iletisim/' : '/en/contact/', label: T.contact },
+];
+const path = Astro.url.pathname;
+const other = lang === 'tr' ? 'en' : 'tr';
+const fullTitle = title ? `${title} — DEMİRCE` : `DEMİRCE Mimarlık — ${T.tagline}`;
+const desc = description ?? T.desc;
+const canonical = new URL(path, SITE.url).href;
+const og = await getImage({ src: image ?? projectCover('mezitli-egitim-kampusu'), width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 78 });
+const org = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  '@id': `${SITE.url}/#ofis`,
+  additionalType: 'https://en.wikipedia.org/wiki/Architectural_firm',
+  name: SITE.name,
+  url: SITE.url,
+  email: SITE.email,
+  telephone: SITE.phone,
+  foundingDate: String(SITE.founded),
+  address: { '@type': 'PostalAddress', streetAddress: SITE.address.street, addressLocality: SITE.address.city, addressCountry: SITE.address.country },
+  geo: { '@type': 'GeoCoordinates', latitude: SITE.geo.lat, longitude: SITE.geo.lon },
+  sameAs: Object.values(SITE.social),
+};
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="alternate" hreflang="tr" href={new URL(alternates.tr, SITE.url).href} />
+    <link rel="alternate" hreflang="en" href={new URL(alternates.en, SITE.url).href} />
+    <link rel="alternate" hreflang="x-default" href={new URL(alternates.tr, SITE.url).href} />
+    <link rel="alternate" type="application/rss+xml" title="DEMİRCE" href={lang === 'tr' ? '/rss.xml' : '/en/rss.xml'} />
+    <link rel="preload" href={serifWoff} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <noscript><style>@media (max-width: 760px) { .head-bar { height: auto !important; flex-wrap: wrap; padding-block: 14px; } .nav-btn { display: none !important; } .nav { width: 100%; margin: 0 !important; } .nav ul { display: flex !important; position: static !important; flex-direction: row !important; flex-wrap: wrap; gap: 4px 18px !important; padding: 0 !important; border: 0 !important; background: none !important; font-family: var(--sans) !important; font-size: 0.875rem !important; } .nav ul a { padding: 4px 0 !important; } }</style></noscript>
+    <meta name="theme-color" content="#f5f3ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#131211" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title ?? SITE.name} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(og.src, SITE.url).href} />
+    <meta property="og:locale" content={lang === 'tr' ? 'tr_TR' : 'en_GB'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(org)} />
+    {jsonLd.map((ld) => <script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', ...ld })} />)}
+    <script type="speculationrules" is:inline>
+      { "prerender": [{ "where": { "and": [{ "href_matches": "/*" }, { "not": { "href_matches": "/api/*" } }] }, "eagerness": "moderate" }] }
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip" href="#icerik">{T.skip}</a>
+    <header class="site-head">
+      <div class="wrap head-bar">
+        <a href={`${base}/`} class="brand" aria-label={`${SITE.name}`}><Logo variant="full" /></a>
+        {running && <span class="running small muted" aria-hidden="true">{running}</span>}
+        <nav class="nav" aria-label={T.menu}>
+          <button type="button" class="nav-btn small" aria-expanded="false" aria-controls="nav-list">{T.menu}</button>
+          <ul id="nav-list">
+              {
+                nav.map((n) => (
+                  <li>
+                    <a href={n.href} aria-current={path.startsWith(n.href) ? 'page' : undefined}>
+                      {n.label}
+                    </a>
+                  </li>
+                ))
+              }
+              <li>
+                <a href={alternates[other]} hreflang={other} lang={other} class="lang">{other.toUpperCase()}</a>
+              </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="icerik" tabindex="-1"><slot /></main>
+
+    <footer class="site-foot">
+      <div class="wrap foot-grid">
+        <div class="foot-brand">
+          <Logo variant="wordmark" />
+        </div>
+        <address class="small">
+          {SITE.address.street}<br />
+          {SITE.address.district} / {SITE.address.city}<br />
+          <a href={SITE.mapsUrl} target="_blank" rel="noopener">{lang === 'tr' ? 'Yol tarifi' : 'Directions'}</a>
+        </address>
+        <p class="small">
+          <a href={SITE.phoneHref}>{SITE.phone}</a><br />
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        </p>
+        <p class="small">
+          <a href={SITE.social.instagram} target="_blank" rel="noopener">Instagram</a><br />
+          <a href={SITE.social.linkedin} target="_blank" rel="noopener">LinkedIn</a><br />
+          <a href={SITE.social.facebook} target="_blank" rel="noopener">Facebook</a>
+        </p>
+        <p class="small muted colophon">
+          © {SITE.founded}–{year} DEMİRCE Mimarlık<br />
+          <a href={lang === 'tr' ? '/kvkk/' : '/en/privacy/'}>{T.privacy}</a>
+        </p>
+      </div>
+    </footer>
+
+    <style>
+      .site-head {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: color-mix(in srgb, var(--paper) 92%, transparent);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+      }
+      .head-bar {
+        height: var(--header-h);
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+      .brand {
+        color: var(--ink);
+        flex: none;
+      }
+      .brand :global(.logo) {
+        height: 19px;
+        width: auto;
+      }
+      .running {
+        margin-inline: auto;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .nav {
+        margin-left: auto;
+      }
+      .running + .nav {
+        margin-left: 0;
+      }
+      .nav-btn {
+        display: none;
+        border: 0;
+        background: none;
+        padding: 10px 0;
+        color: var(--ink);
+        cursor: pointer;
+      }
+      .nav ul {
+        display: flex;
+        gap: clamp(16px, 2.4vw, 36px);
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-family: var(--sans);
+        font-size: var(--t-s);
+      }
+      .nav a {
+        text-decoration: none;
+        color: var(--ink-2);
+        padding-block: 8px;
+      }
+      .nav a:hover,
+      .nav a[aria-current='page'] {
+        color: var(--ink);
+        text-decoration: underline;
+      }
+      .lang {
+        color: var(--muted) !important;
+      }
+      @media (max-width: 760px) {
+        .running {
+          display: none;
+        }
+        .nav,
+        .running + .nav {
+          margin-left: auto;
+        }
+        .nav-btn {
+          display: block;
+        }
+        .nav ul {
+          display: none;
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: var(--header-h);
+          flex-direction: column;
+          gap: 0;
+          padding: 8px var(--gutter) 20px;
+          background: var(--paper);
+          border-bottom: 1px solid var(--rule);
+          font-family: var(--serif);
+          font-size: var(--t-xl);
+        }
+        .nav.is-open ul {
+          display: flex;
+        }
+        .nav ul a {
+          display: block;
+          padding: 6px 0;
+        }
+      }
+      .site-foot {
+        margin-top: clamp(80px, 12vw, 180px);
+        border-top: 1px solid var(--rule);
+        padding-block: 40px 48px;
+      }
+      .foot-grid {
+        display: grid;
+        grid-template-columns: 2fr repeat(4, minmax(0, 1fr));
+        gap: 24px;
+        align-items: start;
+      }
+      .foot-brand :global(.logo) {
+        height: 22px;
+        width: auto;
+        color: var(--ink);
+      }
+      address {
+        font-style: normal;
+      }
+      .site-foot a {
+        text-decoration: none;
+      }
+      .site-foot a:hover {
+        text-decoration: underline;
+      }
+      @media (max-width: 900px) {
+        .foot-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .foot-brand {
+          grid-column: 1 / -1;
+        }
+      }
+    </style>
+    <script>
+      const nav = document.querySelector<HTMLElement>('.nav');
+      const btn = nav?.querySelector<HTMLButtonElement>('.nav-btn');
+      btn?.addEventListener('click', () => {
+        const open = nav!.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    </script>
+  </body>
+</html>

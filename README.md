@@ -1,55 +1,45 @@
 # DEMİRCE Mimarlık — www.demirce.com
 
-DEMİRCE Mimarlık'ın yeni web sitesi. Eski WordPress sitesindeki tüm projeler, metinler ve görseller taşındı; site sıfırdan, hızlı, iki dilli (TR/EN) ve bakımı kolay bir statik site olarak yeniden tasarlandı.
+DEMİRCE Mimarlık'ın yeni web sitesi. Eski WordPress sitesindeki projeler, metinler, görseller ve yazılar taşındı; site sıfırdan, hızlı, iki dilli (TR/EN) ve bakımı kolay bir statik site olarak yeniden tasarlandı.
 
-> **Tasarım kavramı — “Pafta”:** Site bir mimari çizim seti gibi okunur. Her sayfanın bir pafta kodu vardır (A-00, A-10…), altbilgide gerçek bir antet (title block) bulunur, arka planda ince çizim ızgarası görünür. Tipografi logodaki dar harflerle uyumlu **Saira**, teknik notlar için **JetBrains Mono**. Vurgu rengi eski sitedeki DEMİRCE macentası (#e42382). Her projenin kendi kimlik rengi vardır.
+## Kavram — “Monografi”
 
----
+Monografi, mimarlık yayıncılığında tek bir mimarın ya da ofisin işlerini anlatan kitaptır: her şeyi listelemez, seçilmiş işleri derinlemesine anlatır. Site de böyle davranır. Kendini kanıtlama çabası olmayan köklü bir ofisin sessiz özgüveni hedeflenir.
 
-## Öne çıkan özellikler
+- **Sayı yok, seçki var.** Hiçbir yerde proje sayısı verilmez; “1999’dan bu yana üretilen işlerden bir seçki” denir.
+- **Birikim ölçek, kesit ve coğrafya ile hissettirilir:**
+  - *Ölçekler* — 1:20 detaydan 1:5000 kent adasına, her ölçekten bir iş
+  - *Kesitler* — tüm projelerden isimsiz küçük görsellerden oluşan bir kontakt sayfası
+  - *Yerler* — İzmir · İstanbul · Antalya · Kuşadası · Denizli · Mersin · Atırav
+  - *Dizin* — tüm çalışmalar tipolojiye göre, kitap sonundaki dizin gibi
+- **Beş derinlemesine inceleme.** Her biri ofisin “doğru soruyu doğru zamanda sormak” ilkesine bağlanan bir soruyla açılır:
+  1. *Bir okul, bir kentin omurgası olabilir mi?* — Mersin Mezitli Eğitim Kampüsü
+  2. *Yoğunluk ile konfor bir arada var olabilir mi?* — Fenix84 Antalya
+  3. *Rezidans gerçekte nedir?* — Borncity
+  4. *Bir yapıya ikinci bir hayat nasıl verilir?* — İlayda Avantgarde Otel
+  5. *Bir öğrenci için ev mi, otel mi?* — Coordinat Bornova
+- **Görünüm:** Newsreader (serif) + Inter; neredeyse tek renk, renk projelerden gelir. Ziyaretçinin sistemine göre otomatik açık/koyu görünüm. Ana sayfanın açılış görseli her gün bir incelemeye döner.
 
-### Sıra dışı fikirler
-| Özellik | Açıklama |
-|---|---|
-| **Canlı Güneş Çalışması** (ana sayfa) | Three.js ile beyaz bir çalışma maketi. Alsancak ofisinin koordinatlarında güneşin **o anki gerçek konumu** hesaplanır; gölgeler canlıdır. Saat kaydırıcısı, 21 Mart / 21 Haziran / 21 Aralık, “Günü oynat”, geceleri yanan pencereler ve İzmir'in **İmbat** meltemini gösteren rüzgâr katmanı. |
-| **Pafta teması** | Açık / Koyu temalara ek olarak tüm siteyi ozalit (blueprint) çizime dönüştüren üçüncü tema. 3B maket de çizgi görünümüne geçer. |
-| **Arsa Potansiyeli Hesaplayıcı** (`/fizibilite/`) | Arsa alanı, emsal, TAKS ve kat sınırıyla inşaat alanı, kat adedi, yükseklik, açık alan ve tipolojiye göre daire / oda / çalışma alanı kapasitesi; izometrik kütle önizlemesi. Sonuç paylaşılabilir bağlantı olur ve tek tıkla iletişim formuna aktarılır. |
-| **İlham Panosu** (`/pano/`) | Proje galerilerindeki her görselde ♥ düğmesi. Ziyaretçi kendi panosunu oluşturur, bağlantıyla paylaşır ya da iletişim formuna ekleyerek ofise gönderir. Veriler yalnızca ziyaretçinin tarayıcısında saklanır. |
-| **Komut paleti** (`⌘K` / `Ctrl+K` / `/`) | Projeler, sayfalar, yazılar ve komutlar (tema, dil) arasında Türkçe karakter duyarsız anlık arama. |
-| **Proje haritası** | İzmir'den Atırav'a tüm proje konumları; derleme anında üretilen SVG — üçüncü taraf harita servisi ve çerez yok. |
-| **“Alsancak'ta şimdi”** | İletişim sayfasında ofisin yerel saati ve güneşin anlık konumu. |
-
-### Modern web standartları
-- **Performans:** Statik HTML, sayfa başına birkaç KB JavaScript. Three.js yalnızca ana sayfa kahraman alanı görünür olduğunda tembel yüklenir. Görseller derlemede WebP'ye çevrilip `srcset` ile boyutlandırılır. Fontlar siteden sunulur, ön yüklenir.
-- **Sayfa geçişleri:** View Transitions API ile proje kartı → proje sayfası arasında görsel morfu; filtrelemede yumuşak geçiş.
-- **Anında açılan sayfalar:** Speculation Rules API ile bağlantılar üzerine gelindiğinde önceden yüklenir.
-- **Kaydırmayla canlanma:** CSS scroll-driven animations (aşamalı geliştirme, desteklemeyen tarayıcıda sorunsuz).
-- **PWA:** Web uygulaması manifesti, ana ekrana eklenebilir, service worker ile çevrimdışı çalışma.
-- **SEO:** Sayfa başına başlık/açıklama, canonical, `hreflang` (TR/EN), Open Graph görselleri, JSON-LD (LocalBusiness, CreativeWork, BlogPosting, FAQPage, BreadcrumbList), site haritası, RSS, robots.txt.
+## Teknik özellikler
+- **Hız:** Statik HTML, harici JavaScript dosyası yok (yalnızca birkaç küçük satır içi betik). Görseller derlemede WebP'ye çevrilip `srcset` ile boyutlandırılır; yazı tipleri siteden sunulur.
+- **Akıcı gezinme:** View Transitions ile yumuşak sayfa geçişleri, Speculation Rules ile önceden yüklenen sayfalar.
+- **SEO:** Sayfa başına başlık/açıklama, canonical, `hreflang`, Open Graph görselleri, JSON-LD (LocalBusiness, Article, CreativeWork, BreadcrumbList), site haritası, RSS, robots.txt, web uygulaması manifesti.
 - **Eski adresler korunur:** Eski WordPress adreslerinin tümü (`/portfolio/...`, `/portfolyo/`, blog yazıları, `/feed/`) yeni adreslere **301** ile yönlendirilir (`public/.htaccess`, `public/_redirects`).
-- **Erişilebilirlik:** Anlamsal HTML, klavyeyle tam kullanım, odak göstergeleri, “içeriğe geç” bağlantısı, `prefers-reduced-motion` desteği, ekran okuyucu etiketleri.
-- **Gizlilik (KVKK):** Çerez yok, izleme yok, gömülü üçüncü taraf içerik yok. KVKK aydınlatma metni sayfası.
+- **Erişilebilirlik:** Anlamsal HTML, klavyeyle kullanım, “içeriğe geç” bağlantısı, `prefers-reduced-motion` desteği; menü JavaScript kapalıyken de çalışır.
+- **Gizlilik (KVKK):** Çerez yok, tarayıcıda veri saklanmaz, izleme yok, gömülü üçüncü taraf içerik yok.
 - **Güvenlik başlıkları:** CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy.
-- **İki dil:** Türkçe (`/`) ve İngilizce (`/en/`); her sayfa diğer dildeki karşılığına bağlanır.
-
----
 
 ## Sayfalar
 
 | TR | EN | İçerik |
 |---|---|---|
-| `/` | `/en/` | Güneş çalışması, yaklaşım, seçili işler, rakamlar, hizmetler, harita, zaman çizelgesi, araçlar, günlük |
-| `/projeler/` | `/en/projects/` | 16 proje — ızgara / liste / harita görünümü, kategori filtresi, arşiv endeksi |
-| `/projeler/<slug>/` | `/en/projects/<slug>/` | Proje künyesi, metin, galeri + tam ekran görüntüleyici, ilgili yazılar, önceki/sonraki |
-| `/ofis/` | `/en/studio/` | Hakkımızda, ilkeler, kurucular, zaman çizelgesi, ödüller & basın, kariyer |
-| `/hizmetler/` | `/en/services/` | 6 hizmet alanı, süreç, tipolojiler, SSS |
-| `/fizibilite/` | `/en/feasibility/` | Arsa potansiyeli hesaplayıcı |
-| `/pano/` | `/en/board/` | İlham panosu |
-| `/gunluk/` | `/en/journal/` | 14 yazı (eski blogdan taşındı) |
-| `/iletisim/` | `/en/contact/` | İletişim formu, adres, yol tarifi |
+| `/` | `/en/` | Açılış (günün görseli), ofis ifadesi, derinlemesine, ölçekler, kesitler, yerler, notlar |
+| `/projeler/` | `/en/projects/` | Derinlemesine incelemeler + dizin + kesitler |
+| `/projeler/<slug>/` | `/en/projects/<slug>/` | 5 inceleme (bölümler, numaralı şekiller, künye) veya sade “levha” sayfası |
+| `/ofis/` | `/en/studio/` | Ofis, çalışma biçimi, çalışma alanları, kurucular, kayıt (ödüller, yayınlar, sergiler) |
+| `/gunluk/` | `/en/journal/` | Notlar (eski blogdan 14 yazı) |
+| `/iletisim/` | `/en/contact/` | Adres, telefon, e-posta, form |
 | `/kvkk/` | `/en/privacy/` | KVKK aydınlatma metni |
-
----
 
 ## Geliştirme
 
@@ -67,34 +57,42 @@ npm run preview   # derlenmiş siteyi yerelde önizler
 
 ```
 src/
-  data/          site.ts (adres, telefon, sosyal medya), projects.ts, services.ts, archive.ts, timeline.ts
-  content/journal/tr|en/   Günlük yazıları (Markdown)
+  data/
+    site.ts        Adres, telefon, e-posta, sosyal medya — tek kaynak
+    projects.ts    Tüm projeler (TR/EN başlık, özet, metin, künye)
+    cases.ts       Beş derinlemesine inceleme: soru, bölümler, şekiller
+    monograph.ts   Ölçekler, yerler, dizin grupları
+    services.ts    Çalışma alanları (Ofis sayfası)
+    archive.ts     Dizindeki diğer çalışmalar
+    timeline.ts    Ödüller, sergiler, söyleşiler (Ofis → Kayıt)
+  content/journal/tr|en/   Notlar (Markdown)
   assets/projects/<slug>/  Proje görselleri (00.webp = kapak)
-  assets/journal/          Yazı kapak görselleri
   views/         Sayfa gövdeleri (TR ve EN ortak)
   pages/         Adresler (TR kök, EN /en/)
-  components/    Başlık, altbilgi, güneş çalışması, harita, galeri…
-  scripts/       İstemci tarafı kodlar (3B sahne, palet, pano…)
-  i18n/ui.ts     Arayüz metinleri ve sayfa adresleri
+  components/    Şekil, inceleme listesi, ölçekler, kesitler, dizin, logo, KVKK
+  layouts/Book.astro   Başlık, altbilgi, SEO
+  styles/book.css      Tasarım sistemi
 public/
-  .htaccess      Apache: yönlendirmeler, güvenlik, önbellek
+  .htaccess              Apache: yönlendirmeler, güvenlik, önbellek
   _redirects, _headers   Netlify / Cloudflare Pages karşılıkları
   api/contact.php        İletişim formu işleyicisi
 ```
 
+### Derinlemesine incelemeyi değiştirmek
+`src/data/cases.ts` dosyasında her inceleme bir proje (`slug`), bir soru, bir giriş paragrafı ve bölümlerden oluşur. Bölümlerdeki şekiller, projenin görsel sırasına göre numaralanır (`3` → `src/assets/projects/<slug>/03.webp`); başka bir projenin görseli `"slug:3"` biçiminde kullanılabilir. Şekil düzenleri: `full`, `wide`, `pair`, `grid`, `strip`, `inset`. Düşük çözünürlüklü görseller otomatik olarak daha dar gösterilir.
+
 ### Yeni proje eklemek
 1. Görselleri `src/assets/projects/<yeni-slug>/` klasörüne `00.webp`, `01.webp`… olarak koyun (`00` kapak). Uzun kenar ~2000 px yeterli.
-2. `src/data/projects.ts` dosyasında listenin başına bir kayıt ekleyin (TR ve EN başlık, özet, metin, kategori, konum, kimlik rengi).
-3. Ana sayfada öne çıkarmak için `src/views/HomePage.astro` içindeki `FEATURED` listesine ekleyin.
+2. `src/data/projects.ts` dosyasına bir kayıt ekleyin. Proje otomatik olarak dizine, kesitlere ve kendi levha sayfasına eklenir.
 
-### Yeni günlük yazısı eklemek
+### Yeni not eklemek
 `src/content/journal/tr/<slug>.md` ve aynı adla `src/content/journal/en/<slug>.md` oluşturun:
 
 ```md
 ---
 title: 'Başlık'
 description: 'Kısa özet'
-date: 2026-11-23
+date: 2026-11-24
 cover: ../../../assets/journal/gorsel.webp   # isteğe bağlı
 project: fenix84-antalya                       # isteğe bağlı, ilgili proje
 tags: ['Ödül']
@@ -102,59 +100,27 @@ tags: ['Ödül']
 Metin…
 ```
 
----
-
 ## Yayına alma
 
 ### Seçenek A — Mevcut hosting (cPanel / Apache + PHP)
-1. `npm run build`
-2. `dist/` klasörünün **içeriğini** sunucudaki `public_html/` klasörüne yükleyin (FTP veya cPanel Dosya Yöneticisi). Gizli `.htaccess` dosyasının da yüklendiğinden emin olun.
+1. `npm run build` (ya da GitHub → Actions → son “CI” çalışması → **demirce-site** paketini indirin)
+2. `dist/` klasörünün **içeriğini** sunucudaki `public_html/` klasörüne yükleyin. Gizli `.htaccess` dosyasının da yüklendiğinden emin olun.
 3. Eski WordPress dosyalarını yedekleyip kaldırın. Eski adresler `.htaccess` ile otomatik yönlendirilir.
-4. İletişim formu `api/contact.php` ile çalışır. `contact.php` içindeki `TO_EMAIL` / `FROM_EMAIL` adreslerini kontrol edin; `FROM_EMAIL` alan adınıza ait olmalıdır (SPF/DMARC).
+4. İletişim formu `api/contact.php` ile çalışır. İçindeki `TO_EMAIL` / `FROM_EMAIL` adreslerini kontrol edin; `FROM_EMAIL` alan adınıza ait olmalıdır (SPF/DMARC).
 
 ### Seçenek B — Cloudflare Pages / Netlify / Vercel
-Depoyu bağlayın; derleme komutu `npm run build`, çıktı klasörü `dist`, Node sürümü 22. `_redirects` ve `_headers` dosyaları otomatik uygulanır. PHP çalışmayacağı için `src/data/site.ts` içindeki `formEndpoint` değerini bir form servisine (Formspree, Basin, Netlify Forms vb.) yönlendirin. Form, sunucuya ulaşamazsa ziyaretçinin e-posta uygulamasında hazır bir taslak açar; mesaj kaybolmaz.
+Depoyu bağlayın; derleme komutu `npm run build`, çıktı klasörü `dist`, Node sürümü 22. `_redirects` ve `_headers` otomatik uygulanır. PHP çalışmayacağı için `src/data/site.ts` içindeki `formEndpoint` değerini bir form servisine (Formspree, Basin, Netlify Forms vb.) yönlendirin. Form, sunucuya ulaşamazsa ziyaretçinin e-posta uygulamasında hazır bir taslak açar; mesaj kaybolmaz.
 
-GitHub Actions (`.github/workflows/ci.yml`) her gönderimde tip denetimi ve derleme yapar, derlenmiş siteyi indirilebilir bir “artifact” olarak saklar.
-
----
-
-## Alternatif tasarım — “Monografi” (`alt/`)
-
-Aynı içerik, farklı bir bakış açısı. Birinci sürüm (“Pafta”) ofisin araçlarını ve etkileşimi öne çıkarır; **Monografi** ise köklü bir ofisin kendini kanıtlama ihtiyacı duymayan sessiz özgüvenini hedefler. Site, ofisin monografi kitabı gibi okunur.
-
-| | Pafta (`src/`) | Monografi (`alt/`) |
-|---|---|---|
-| Ton | Teknik, etkileşimli, enerjik | Sakin, editoryal, kendinden emin |
-| Tipografi | Saira (dar) + JetBrains Mono | Newsreader (serif) + Inter |
-| Renk | Macenta vurgu, 3 tema | Neredeyse tek renk; renk projelerden gelir |
-| Birikimi anlatma | Rakamlar, sayaçlar, harita | **Sayı yok:** ölçekler (1:20 → 1:5000), kesitler (kontakt sayfası), dizin, yerler |
-| Projeler | 16 proje eşit ağırlıkta kartlar | **5 derinlemesine inceleme** (her biri bir soruyla açılır) + dizin + sade “levha” sayfaları |
-| Ek araçlar | Güneş çalışması, fizibilite, ilham panosu, ⌘K | Yok — yalnızca iş ve metin |
-
-**Derinlemesine incelemeler** (`alt/data/cases.ts`):
-1. *Bir okul, bir kentin omurgası olabilir mi?* — Mersin Mezitli Eğitim Kampüsü
-2. *Yoğunluk ile konfor bir arada var olabilir mi?* — Fenix84 Antalya
-3. *Rezidans gerçekte nedir?* — Borncity
-4. *Bir yapıya ikinci bir hayat nasıl verilir?* — İlayda Avantgarde Otel
-5. *Bir öğrenci için ev mi, otel mi?* — Coordinat Bornova
-
-Proje verileri, görseller, günlük yazıları, iletişim formu, KVKK metni ve yönlendirmeler iki sürümde ortaktır; adres yapısı (`/projeler/…`, `/ofis/`, `/gunluk/…`, `/iletisim/`) aynıdır.
-
-```bash
-npm run dev:alt       # http://localhost:4321 — Monografi
-npm run build:alt     # dist-alt/ klasörüne derler
-npm run preview:alt   # http://localhost:4322
-```
-
-Yayına almak için `dist/` yerine `dist-alt/` klasörünün içeriğini yükleyin.
-
----
+GitHub Actions (`.github/workflows/ci.yml`) her gönderimde tip denetimi ve derleme yapar, derlenmiş siteyi indirilebilir bir paket olarak saklar.
 
 ## Yayından önce kontrol edilmesi gerekenler
-- [ ] **Kurucular / unvanlar** (`src/views/OfficePage.astro`): eski sitedeki yazılardan derlendi — Alpay Demirci ve Burçin Demirci için unvanları doğrulayın, isterseniz fotoğraf ekleyin.
-- [ ] **Arşiv** (`src/data/archive.ts`) ve **zaman çizelgesi** (`src/data/timeline.ts`): eski blog kayıtlarından derlendi; yıllar, haber tarihleridir.
-- [ ] **Proje yılları ve konumları**: eski sitede yer almayan bilgiler boş bırakıldı (ör. Otel Deco, Otel Lusso, TLP Evi, Borncity konumu).
-- [ ] **KVKK metni** (`src/views/PrivacyPage.astro`): şablondur, hukuk danışmanınızla gözden geçirin.
+- [ ] **Kurucular / unvanlar** (`src/views/Office.astro`): eski sitedeki yazılardan derlendi; Alpay Demirci ve Burçin Demirci için unvanları doğrulayın.
+- [ ] **İnceleme metinleri ve şekil altyazıları** (`src/data/cases.ts`): eski proje yazılarından genişletildi; bazı tasvirler görsellere bakılarak yazıldı.
+- [ ] **Yüksek çözünürlüklü görseller:** özellikle Mezitli görselleri eski sitede düşük çözünürlüklü; ofisteki asıl görseller monografi düzenini çok güçlendirir.
+- [ ] **Dizin** (`src/data/archive.ts`) ve **kayıt** (`src/data/timeline.ts`): eski blog kayıtlarından derlendi; yıllar haber tarihleridir.
+- [ ] **Eksik künye bilgileri:** eski sitede yer almayan yıl ve konumlar boş bırakıldı (ör. Otel Deco, Otel Lusso, TLP Evi, Borncity).
+- [ ] **KVKK metni** (`src/components/PrivacyContent.astro`): şablondur, hukuk danışmanınızla gözden geçirin.
 - [ ] **Posta kodu** (`src/data/site.ts` → `postalCode`).
-- [ ] **İletişim formu**: yayına aldıktan sonra bir deneme mesajı gönderin.
+- [ ] **İletişim formu:** yayına aldıktan sonra bir deneme mesajı gönderin.
+
+> İlk tasarım denemesi (“Pafta”: 3B güneş çalışması, fizibilite aracı, ilham panosu) git geçmişinde `f33bd9b` işlemesinde durur; gerekirse geri alınabilir.

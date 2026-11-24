@@ -1,0 +1,74 @@
+---
+import Book from '~/layouts/Book.astro';
+import CaseList from '~/components/CaseList.astro';
+import IndexList from '~/components/IndexList.astro';
+import Mosaic from '~/components/Mosaic.astro';
+import { SITE } from '~/data/site';
+import type { Lang } from '~/i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const c =
+  lang === 'tr'
+    ? {
+        title: 'Çalışmalar',
+        lead: `Bu sayfa, ${SITE.founded}’dan bu yana otelden kampüse, konuttan iç mekâna farklı ölçeklerde üretilen işlerden bir seçkidir. Beş çalışmayı derinlemesine anlatıyoruz; diğerlerini dizinde bulabilirsiniz.`,
+        deep: 'Derinlemesine',
+        deepNote: 'Beş çalışma, beş soru',
+        index: 'Dizin',
+        indexNote: 'Seçilmiş çalışmalar, tipolojiye göre',
+        cuts: 'Kesitler',
+      }
+    : {
+        title: 'Works',
+        lead: `This page is a selection of work produced since ${SITE.founded} at many scales — from hotels to campuses, housing to interiors. Five works are told in depth; the rest are listed in the index.`,
+        deep: 'In depth',
+        deepNote: 'Five works, five questions',
+        index: 'Index',
+        indexNote: 'Selected works by typology',
+        cuts: 'Fragments',
+      };
+---
+
+<Book lang={lang} title={c.title} description={c.lead} alternates={{ tr: '/projeler/', en: '/en/projects/' }}>
+  <header class="wrap head">
+    <h1>{c.title}</h1>
+    <p class="lead">{c.lead}</p>
+  </header>
+
+  <section class="wrap section first" aria-labelledby="h-deep">
+    <h2 id="h-deep" class="kicker"><b>{c.deep}</b><span>{c.deepNote}</span></h2>
+    <CaseList lang={lang} />
+  </section>
+
+  <section class="wrap section" id="dizin" aria-labelledby="h-index">
+    <h2 id="h-index" class="kicker"><b>{c.index}</b><span>{c.indexNote}</span></h2>
+    <IndexList lang={lang} />
+  </section>
+
+  <section class="wrap" aria-labelledby="h-cuts">
+    <h2 id="h-cuts" class="kicker"><b>{c.cuts}</b><span>{SITE.founded}—</span></h2>
+    <Mosaic lang={lang} count={72} />
+  </section>
+</Book>
+
+<style>
+  .head {
+    padding-block: clamp(56px, 9vw, 140px) 0;
+  }
+  h1 {
+    font-size: var(--t-xxl);
+    margin-bottom: 28px;
+  }
+  .lead {
+    font-size: var(--t-l);
+    line-height: 1.45;
+    color: var(--ink-2);
+    max-width: 30em;
+  }
+  .first {
+    padding-top: clamp(48px, 7vw, 96px);
+  }
+</style>
