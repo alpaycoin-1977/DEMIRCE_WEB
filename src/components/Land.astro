@@ -1,0 +1,71 @@
+---
+/**
+ * ARAZİ — her çalışmanın adından türeyen, yavaşça akan topoğrafya.
+ * Fotoğraf verilirse arazinin en "yüksek" yerlerinde fotoğraf görünür.
+ * Çizim tarayıcıda yapılır (src/scripts/land.ts); JavaScript yoksa
+ * noktalı bir kâğıt zemini (ve varsa fotoğraf) görünür.
+ */
+import type { ImageMetadata } from 'astro';
+import { landPhoto } from '~/lib/landPhoto';
+
+interface Props {
+  seed: string;
+  id?: string;
+  photo?: ImageMetadata;
+  /** Fotoğrafın ya da arazinin ekran okuyucu açıklaması. Yoksa süs kabul edilir. */
+  alt?: string;
+  class?: string;
+  /** Eşik: büyüdükçe mürekkep (fotoğraf) alanı küçülür. 0.4–0.6 */
+  threshold?: number;
+  /** Mürekkebi sağa (+) / sola (−) toplar */
+  bias?: number;
+  biasCenter?: number;
+  /** Mürekkebi aşağı (+) / yukarı (−) toplar */
+  biasY?: number;
+  ink?: 'photo' | 'black' | 'none';
+  scale?: number;
+  levels?: number;
+  dots?: boolean;
+  /** İnce dikey çizgi demeti (0..1 yatay konum) */
+  hair?: number;
+  breathe?: boolean;
+  cell?: number;
+}
+const { id, seed, photo, alt, class: cls = '', threshold, bias, biasCenter, biasY, ink, scale, levels, dots = true, hair, breathe = true, cell } = Astro.props;
+const src = photo ? await landPhoto(photo) : undefined;
+const inkMode = ink ?? (photo ? 'photo' : 'black');
+---
+
+<div
+  id={id}
+  class={`land ${cls}`}
+  data-seed={seed}
+  data-photo={inkMode === 'photo' ? src : undefined}
+  data-ink={inkMode}
+  data-threshold={threshold}
+  data-bias={bias}
+  data-bias-center={biasCenter}
+  data-bias-y={biasY}
+  data-scale={scale}
+  data-levels={levels}
+  data-dots={dots ? undefined : '0'}
+  data-hair={hair}
+  data-breathe={breathe ? undefined : '0'}
+  data-cell={cell}
+  role={alt ? 'img' : undefined}
+  aria-label={alt}
+  aria-hidden={alt ? undefined : 'true'}
+>
+  {
+    src && (
+      <noscript>
+        <img src={src} alt="" class="land-fallback" />
+      </noscript>
+    )
+  }
+</div>
+
+<script>
+  import { mountAll } from '~/scripts/land';
+  mountAll();
+</script>

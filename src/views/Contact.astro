@@ -1,40 +1,44 @@
 ---
 import Book from '~/layouts/Book.astro';
+import PageHead from '~/components/PageHead.astro';
 import { SITE } from '~/data/site';
+import { formatCoords } from '~/lib/text';
 import { u, type Lang } from '~/i18n/ui';
 
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
+const coords = formatCoords(SITE.geo.lat, SITE.geo.lon, lang);
 const c =
   lang === 'tr'
-    ? { title: 'İletişim', write: 'Bize yazın', name: 'Ad soyad', email: 'E-posta', msg: 'Mesaj', consent: 'Kişisel verilerimin talebimi yanıtlamak amacıyla işlenmesine ilişkin', link: 'aydınlatma metnini', end: 'okudum.', send: 'Gönder', ok: 'Teşekkürler, mesajınız bize ulaştı.', fb: 'Sunucuya ulaşılamadı; e-posta uygulamanızda bir taslak açılıyor.', dir: 'Yol tarifi' }
-    : { title: 'Contact', write: 'Write to us', name: 'Name', email: 'Email', msg: 'Message', consent: 'I have read the', link: 'privacy notice', end: 'on how my data is processed.', send: 'Send', ok: 'Thank you, your message has reached us.', fb: 'We could not reach the server; opening a draft in your email app.', dir: 'Directions' };
+    ? { line: 'Bir sonraki soruyu birlikte soralım.', title: 'İletişim', write: 'Bize yazın', name: 'Ad soyad', email: 'E-posta', msg: 'Mesaj', consent: 'Kişisel verilerimin talebimi yanıtlamak amacıyla işlenmesine ilişkin', link: 'aydınlatma metnini', end: 'okudum.', send: 'Gönder', ok: 'Teşekkürler, mesajınız bize ulaştı.', fb: 'Sunucuya ulaşılamadı; e-posta uygulamanızda bir taslak açılıyor.', dir: 'Yol tarifi' }
+    : { line: 'Let’s ask the next question together.', title: 'Contact', write: 'Write to us', name: 'Name', email: 'Email', msg: 'Message', consent: 'I have read the', link: 'privacy notice', end: 'on how my data is processed.', send: 'Send', ok: 'Thank you, your message has reached us.', fb: 'We could not reach the server; opening a draft in your email app.', dir: 'Directions' };
 ---
 
 <Book lang={lang} title={c.title} alternates={{ tr: '/iletisim/', en: '/en/contact/' }}>
-  <section class="wrap head">
-    <h1>{c.title}</h1>
+  <PageHead n="04" label={c.title} note={coords} title={c.title} seed="alsancak-kultur-133" hair={0.5}>
+    <p class="q line">{c.line}</p>
     <div class="grid">
+      <p class="lines">
+        <a href={`mailto:${SITE.email}`} lang="en">{SITE.email}</a><br />
+        <a href={SITE.phoneHref}>{SITE.phone}</a>
+      </p>
       <address class="addr">
         {SITE.address.street}<br />
         {SITE.address.district} / {SITE.address.city}
         <a class="arrow-link" href={SITE.mapsUrl} target="_blank" rel="noopener">{c.dir}</a>
       </address>
-      <p class="lines">
-        <a href={SITE.phoneHref}>{SITE.phone}</a><br />
-        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
-      </p>
     </div>
-  </section>
+    <p class="sign"><b>DEMİRCE · ALSANCAK</b><span>{coords}</span></p>
+  </PageHead>
 
   <section class="wrap section" aria-labelledby="h-w">
     <h2 id="h-w" class="kicker"><b>{c.write}</b></h2>
     <form class="form" method="post" action={u(SITE.formEndpoint)} novalidate data-form data-email={SITE.email} data-m={JSON.stringify(c)}>
-      <label><span class="small muted">{c.name}</span><input name="name" required maxlength="120" autocomplete="name" /></label>
-      <label><span class="small muted">{c.email}</span><input name="email" type="email" required maxlength="160" autocomplete="email" /></label>
-      <label class="full"><span class="small muted">{c.msg}</span><textarea name="message" rows="6" required minlength="10" maxlength="6000"></textarea></label>
+      <label><span class="label muted">{c.name}</span><input name="name" required maxlength="120" autocomplete="name" /></label>
+      <label><span class="label muted">{c.email}</span><input name="email" type="email" required maxlength="160" autocomplete="email" /></label>
+      <label class="full"><span class="label muted">{c.msg}</span><textarea name="message" rows="6" required minlength="10" maxlength="6000"></textarea></label>
       <input type="hidden" name="subject" value={lang === 'tr' ? 'Web sitesi' : 'Website'} />
       <input type="hidden" name="lang" value={lang} />
       <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off" /></div>
@@ -45,26 +49,38 @@ const c =
 </Book>
 
 <style>
-  .head {
-    padding-block: clamp(56px, 9vw, 140px) 0;
-  }
-  h1 {
-    font-size: var(--t-xxl);
-    margin-bottom: 40px;
+  .line {
+    font-size: var(--t-xl);
+    line-height: 1.04;
+    margin: 0 0 32px;
   }
   .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 32px;
-    font-size: var(--t-xl);
-    line-height: 1.25;
+    gap: 24px 32px;
+    line-height: 1.5;
+    margin-bottom: 32px;
+  }
+  .lines {
+    margin: 0;
+    font-family: var(--display);
+    font-stretch: 68%;
+    font-weight: 540;
+    font-size: var(--t-l);
+    line-height: 1.15;
+    text-transform: uppercase;
   }
   address {
     font-style: normal;
+    color: var(--ink-2);
   }
   .addr .arrow-link {
-    display: block;
-    margin-top: 16px;
+    display: flex;
+    width: fit-content;
+    margin-top: 14px;
+  }
+  .sign {
+    margin: 0;
   }
   .lines a {
     text-decoration: none;
@@ -123,8 +139,11 @@ const c =
   }
   button {
     font-family: var(--sans);
-    font-size: var(--t-s);
-    padding: 12px 22px;
+    font-size: var(--t-xs);
+    font-weight: 560;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 14px 26px;
     background: var(--ink);
     color: var(--paper);
     border: 0;

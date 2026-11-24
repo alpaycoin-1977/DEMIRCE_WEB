@@ -1,0 +1,12 @@
+---
+/** Büyük harfle yazılan yerlerde yabancı marka adlarını korur (Fenix84 → FENİX84 olmaz) */
+import { brandSafe } from '~/lib/text';
+import type { Lang } from '~/i18n/ui';
+interface Props {
+  text: string;
+  lang: Lang;
+}
+const { text, lang } = Astro.props;
+---
+
+<Fragment set:html={brandSafe(text, lang)} />

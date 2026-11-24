@@ -1,5 +1,6 @@
 ---
 import Book from '~/layouts/Book.astro';
+import PageHead from '~/components/PageHead.astro';
 import CaseList from '~/components/CaseList.astro';
 import IndexList from '~/components/IndexList.astro';
 import Mosaic from '~/components/Mosaic.astro';
@@ -20,6 +21,7 @@ const c =
         index: 'Dizin',
         indexNote: 'Seçilmiş çalışmalar, tipolojiye göre',
         cuts: 'Kesitler',
+        note: `${SITE.founded} —`,
       }
     : {
         title: 'Works',
@@ -29,14 +31,12 @@ const c =
         index: 'Index',
         indexNote: 'Selected works by typology',
         cuts: 'Fragments',
+        note: `${SITE.founded} —`,
       };
 ---
 
 <Book lang={lang} title={c.title} description={c.lead} alternates={{ tr: '/projeler/', en: '/en/projects/' }}>
-  <header class="wrap head">
-    <h1>{c.title}</h1>
-    <p class="lead">{c.lead}</p>
-  </header>
+  <PageHead n="01" label={c.title} note={c.note} title={c.title} lead={c.lead} seed="calismalar" hair={0.7} />
 
   <section class="wrap section first" aria-labelledby="h-deep">
     <h2 id="h-deep" class="kicker"><b>{c.deep}</b><span>{c.deepNote}</span></h2>
@@ -55,20 +55,7 @@ const c =
 </Book>
 
 <style>
-  .head {
-    padding-block: clamp(56px, 9vw, 140px) 0;
-  }
-  h1 {
-    font-size: var(--t-xxl);
-    margin-bottom: 28px;
-  }
-  .lead {
-    font-size: var(--t-l);
-    line-height: 1.45;
-    color: var(--ink-2);
-    max-width: 30em;
-  }
   .first {
-    padding-top: clamp(48px, 7vw, 96px);
+    padding-top: 0;
   }
 </style>

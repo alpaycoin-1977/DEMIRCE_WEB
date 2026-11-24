@@ -1,6 +1,9 @@
 ---
 import { Image } from 'astro:assets';
 import Book from '~/layouts/Book.astro';
+import PageHead from '~/components/PageHead.astro';
+import Land from '~/components/Land.astro';
+import { approach } from '~/data/approach';
 import { SITE } from '~/data/site';
 import { timeline } from '~/data/timeline';
 import { services } from '~/data/services';
@@ -30,7 +33,6 @@ const c =
         areas: 'Çalışma alanları',
         areasNote: 'Mimari, iç mekân ve peyzaj tek bir düşünce altında',
         eg: 'Örnek',
-        list: ['Fonksiyonellik', 'Yenilikçilik', 'Yalınlık', 'Kullanıcıların yaşam biçimiyle bütünleşmek', 'Bulunduğu çevreye değer katmak'],
         people: 'Kurucular',
         record: 'Kayıt',
         recordNote: 'Ödüller, yayınlar, sergiler',
@@ -50,7 +52,6 @@ const c =
         areas: 'Areas of work',
         areasNote: 'Architecture, interiors and landscape as one idea',
         eg: 'See',
-        list: ['Functionality', 'Innovation', 'Simplicity', 'Integrating with the way people live', 'Adding value to the surroundings'],
         people: 'Founders',
         record: 'Record',
         recordNote: 'Awards, publications, exhibitions',
@@ -69,11 +70,8 @@ const img = projectCover('ilayda-avantgarde');
 ---
 
 <Book lang={lang} title={c.title} description={c.p1} alternates={{ tr: '/ofis/', en: '/en/studio/' }}>
-  <header class="wrap head">
-    <h1>{c.title}</h1>
-  </header>
+  <PageHead n="02" label={c.title} note={`${SITE.founded} —`} title={c.title} lead={c.p1} seed="ofis-alsancak" hair={0.74} />
   <section class="wrap about">
-    <p class="big">{c.p1}</p>
     <div class="cols">
       <p>{c.p2}</p>
       <p>{c.p3}</p>
@@ -84,16 +82,29 @@ const img = projectCover('ilayda-avantgarde');
     <Image src={img} alt="" widths={[800, 1200, 1600]} sizes="(min-width: 1520px) 1400px, 100vw" loading="lazy" />
   </figure>
 
-  <section class="wrap section">
-    <blockquote class="quote">
-      <p class="italic">{c.quote}</p>
-      <footer class="small muted">— {c.quoteBy}, 2013</footer>
-    </blockquote>
+  <section class="night quote-band">
+    <div class="wrap qb">
+      <blockquote class="quote">
+        <p class="q">{c.quote}</p>
+        <footer class="mono muted">— {c.quoteBy}, 2013</footer>
+      </blockquote>
+      <Land seed="yasama-bicimi" class="qb-land" threshold={0.6} levels={30} hair={0.2} />
+    </div>
   </section>
 
-  <section class="wrap section grid2" aria-labelledby="h-p">
+  <section class="wrap section" aria-labelledby="h-p">
     <h2 id="h-p" class="kicker"><b>{c.principles}</b></h2>
-    <ol class="principles">{c.list.map((x) => <li>{x}</li>)}</ol>
+    <ol class="principles">
+      {
+        approach.map((a, k) => (
+          <li>
+            <span class="mono muted">{String(k + 1).padStart(2, '0')}</span>
+            <h3>{a.title[lang]}</h3>
+            <p>{a.body[lang]}</p>
+          </li>
+        ))
+      }
+    </ol>
   </section>
 
   <section class="wrap section" aria-labelledby="h-a">
@@ -141,7 +152,7 @@ const img = projectCover('ilayda-avantgarde');
           const href = m.href?.project ? projectUrl(m.href.project, lang) : m.href?.post ? postUrl(m.href.post, lang) : undefined;
           return (
             <li>
-              <span class="small muted">{m.year}</span>
+              <span class="mono muted">{m.year}</span>
               {href ? <a href={href}>{m.title[lang]}</a> : <span>{m.title[lang]}</span>}
             </li>
           );
@@ -157,19 +168,8 @@ const img = projectCover('ilayda-avantgarde');
 </Book>
 
 <style>
-  .head {
-    padding-block: clamp(56px, 9vw, 140px) 24px;
-  }
-  h1 {
-    font-size: var(--t-xxl);
-  }
   .about {
     padding-bottom: clamp(48px, 7vw, 96px);
-  }
-  .big {
-    font-size: var(--t-xl);
-    line-height: 1.2;
-    max-width: 22em;
   }
   .cols {
     columns: 2 320px;
@@ -183,26 +183,68 @@ const img = projectCover('ilayda-avantgarde');
     max-height: 80vh;
     object-fit: cover;
   }
+  .quote-band {
+    margin-top: clamp(72px, 10vw, 152px);
+  }
+  .qb {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 88px);
+    align-items: center;
+    padding-block: clamp(64px, 8vw, 120px);
+  }
   .quote {
     margin: 0;
-    max-width: 22em;
-    margin-left: auto;
   }
   .quote p {
-    font-size: var(--t-xl);
-    line-height: 1.2;
-    margin-bottom: 12px;
+    font-size: var(--t-xxl);
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+  .qb :global(.qb-land) {
+    aspect-ratio: 1;
+  }
+  @media (max-width: 860px) {
+    .qb {
+      grid-template-columns: 1fr;
+    }
+    .qb :global(.qb-land) {
+      aspect-ratio: 16 / 9;
+    }
   }
   .principles {
+    list-style: none;
     margin: 0;
-    padding-left: 1.4em;
-    font-size: var(--t-xl);
-    line-height: 1.35;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: clamp(20px, 2.4vw, 40px);
   }
-  .principles li::marker {
+  .principles li {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--ink);
+  }
+  .principles h3 {
+    font-size: clamp(1.5rem, 1.1rem + 1vw, 2.1rem);
+    line-height: 0.92;
+  }
+  .principles p {
     font-size: var(--t-s);
-    color: var(--muted);
-    font-family: var(--sans);
+    color: var(--ink-2);
+    margin: 0;
+  }
+  @media (max-width: 1000px) {
+    .principles {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .principles {
+      grid-template-columns: 1fr;
+    }
   }
   .areas {
     list-style: none;
@@ -241,7 +283,12 @@ const img = projectCover('ilayda-avantgarde');
     gap: 4px;
   }
   .pn {
-    font-size: var(--t-l);
+    font-family: var(--display);
+    font-stretch: 68%;
+    font-weight: 560;
+    font-size: var(--t-xl);
+    line-height: 0.95;
+    text-transform: uppercase;
   }
   .record {
     list-style: none;

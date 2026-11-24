@@ -2,6 +2,8 @@
 import { Image } from 'astro:assets';
 import { render, type CollectionEntry } from 'astro:content';
 import Book from '~/layouts/Book.astro';
+import Land from '~/components/Land.astro';
+import Name from '~/components/Name.astro';
 import { getProject } from '~/data/projects';
 import { u, postUrl, projectUrl, formatDate, type Lang } from '~/i18n/ui';
 
@@ -26,11 +28,13 @@ const project = post.data.project ? getProject(post.data.project) : undefined;
 >
   <article class="wrap post">
     <header class="head">
-      <a class="small muted back" href={u(lang === 'tr' ? '/gunluk/' : '/en/journal/')}>← {lang === 'tr' ? 'Notlar' : 'Notes'}</a>
-      <time class="small muted" datetime={post.data.date.toISOString()}>{formatDate(post.data.date, lang)}</time>
-      <h1>{post.data.title}</h1>
+      <p class="sec-head" aria-hidden="true"><span class="n">03</span><b>{lang === 'tr' ? 'Notlar' : 'Notes'}</b><span class="fill"></span><span class="note">{post.data.date.getFullYear()}</span></p>
+      <a class="label muted back" href={u(lang === 'tr' ? '/gunluk/' : '/en/journal/')}>← {lang === 'tr' ? 'Tüm notlar' : 'All notes'}</a>
+      <time class="mono muted" datetime={post.data.date.toISOString()}>{formatDate(post.data.date, lang)}</time>
+      <h1><Name text={post.data.title} lang={lang} /></h1>
       <p class="lead">{post.data.description}</p>
     </header>
+    {!post.data.cover && <Land seed={slug} class="post-land" threshold={0.6} levels={26} hair={0.9} />}
     {
       post.data.cover && (
         <figure class="cover">
@@ -44,7 +48,7 @@ const project = post.data.project ? getProject(post.data.project) : undefined;
       project && (
         <p class="rel">
           <a class="arrow-link" href={projectUrl(project.slug, lang)}>
-            {project.title[lang]}
+            <Name text={project.title[lang]} lang={lang} />
           </a>
         </p>
       )
@@ -58,20 +62,33 @@ const project = post.data.project ? getProject(post.data.project) : undefined;
   }
   .head {
     display: grid;
+    justify-items: start;
     gap: 10px;
-    padding-block: clamp(48px, 8vw, 120px) clamp(32px, 4vw, 48px);
+    padding-block: clamp(28px, 3.4vw, 48px) clamp(32px, 4vw, 48px);
+  }
+  .head .sec-head {
+    width: 100%;
+    margin-bottom: clamp(20px, 3vw, 40px);
   }
   .back {
     text-decoration: none;
   }
   h1 {
     font-size: var(--t-xxl);
-    margin-block: 8px;
+    line-height: 0.9;
+    margin-block: 8px 12px;
   }
   .lead {
+    font-family: var(--serif);
+    font-style: italic;
     font-size: var(--t-l);
+    line-height: 1.3;
     color: var(--ink-2);
     margin: 0;
+    max-width: 34em;
+  }
+  .post :global(.post-land) {
+    height: clamp(120px, 16vw, 200px);
   }
   .cover :global(img) {
     width: 100%;
@@ -81,7 +98,6 @@ const project = post.data.project ? getProject(post.data.project) : undefined;
   }
   .body {
     margin: clamp(40px, 6vw, 72px) 0 0 auto;
-    font-size: var(--t-m);
   }
   .rel {
     max-width: var(--text);

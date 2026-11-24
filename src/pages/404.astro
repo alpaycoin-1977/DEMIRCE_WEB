@@ -1,24 +1,40 @@
 ---
 import Book from '~/layouts/Book.astro';
+import Land from '~/components/Land.astro';
 import { u } from '~/i18n/ui';
 ---
 
 <Book lang="tr" title="Sayfa bulunamadı" alternates={{ tr: '/', en: '/en/' }} noindex>
   <section class="wrap nf">
-    <p class="small muted">404</p>
-    <h1 class="italic">Aradığınız sayfa burada değil.</h1>
-    <p>Sayfa taşınmış ya da kaldırılmış olabilir. <a href={u('/projeler/')}>Çalışmalar</a> sayfasından ya da <a href={u('/')}>ana sayfadan</a> devam edebilirsiniz.</p>
-    <p class="small muted">This page could not be found. <a href={u('/en/')}>English</a></p>
+    <div>
+      <p class="sign"><b>404 · HARİTADA YOK</b><span>00,0000° K · 00,0000° D</span></p>
+      <h1 class="q">Bu arazi henüz haritada yok.</h1>
+      <p>Aradığınız sayfa taşınmış ya da kaldırılmış olabilir. <a href={u('/projeler/')}>Çalışmalar</a> sayfasından ya da <a href={u('/')}>ana sayfadan</a> devam edebilirsiniz.</p>
+      <p class="small muted">This page could not be found. <a href={u('/en/')}>English</a></p>
+    </div>
+    <Land seed="kayip-arazi-404" class="nf-land" threshold={0.5} levels={40} hair={0.5} />
   </section>
 </Book>
 
 <style>
   .nf {
-    padding-block: clamp(80px, 14vw, 200px);
-    max-width: 900px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 88px);
+    align-items: center;
+    padding-block: clamp(48px, 8vw, 120px) 0;
   }
   h1 {
     font-size: var(--t-xxl);
-    margin: 12px 0 24px;
+    line-height: 1;
+    margin: 32px 0 24px;
+  }
+  .nf :global(.nf-land) {
+    aspect-ratio: 1;
+  }
+  @media (max-width: 760px) {
+    .nf {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

@@ -1,5 +1,6 @@
 ---
 import Book from '~/layouts/Book.astro';
+import PageHead from '~/components/PageHead.astro';
 import PrivacyContent from '~/components/PrivacyContent.astro';
 import type { Lang } from '~/i18n/ui';
 interface Props {
@@ -9,15 +10,15 @@ const { lang } = Astro.props;
 ---
 
 <Book lang={lang} title={lang === 'tr' ? 'KVKK' : 'Privacy'} alternates={{ tr: '/kvkk/', en: '/en/privacy/' }}>
+  <PageHead
+    n="§"
+    label={lang === 'tr' ? 'KVKK' : 'Privacy'}
+    title={lang === 'tr' ? 'KVKK ve gizlilik' : 'Privacy'}
+    lead={lang === 'tr' ? 'Bu site çerez kullanmaz ve tarayıcınızda hiçbir şey saklamaz.' : 'This site uses no cookies and stores nothing in your browser.'}
+    seed="kvkk"
+    threshold={0.62}
+  />
   <div class="wrap">
-    <h1>{lang === 'tr' ? 'KVKK ve gizlilik' : 'Privacy'}</h1>
     <PrivacyContent lang={lang} />
   </div>
 </Book>
-
-<style>
-  h1 {
-    font-size: var(--t-xxl);
-    padding-block: clamp(56px, 9vw, 140px) 40px;
-  }
-</style>

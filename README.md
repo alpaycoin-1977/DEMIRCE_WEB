@@ -2,28 +2,27 @@
 
 DEMİRCE Mimarlık'ın yeni web sitesi. Eski WordPress sitesindeki projeler, metinler, görseller ve yazılar taşındı; site sıfırdan, hızlı, iki dilli (TR/EN) ve bakımı kolay bir statik site olarak yeniden tasarlandı.
 
-## Kavram — “Monografi”
+## Kavram — “Arazi”
 
-Monografi, mimarlık yayıncılığında tek bir mimarın ya da ofisin işlerini anlatan kitaptır: her şeyi listelemez, seçilmiş işleri derinlemesine anlatır. Site de böyle davranır. Kendini kanıtlama çabası olmayan köklü bir ofisin sessiz özgüveni hedeflenir.
+Site, köklü bir ofisin **sanat defteri** gibi okunur: kâğıt, mürekkep, eş yükselti çizgileri. Kendini kanıtlama çabası olmayan bir ofisin sessiz özgüveni; birikim tek tek sayılmadan hissettirilir.
 
-- **Sayı yok, seçki var.** Hiçbir yerde proje sayısı verilmez; “1999’dan bu yana üretilen işlerden bir seçki” denir.
-- **Birikim ölçek, kesit ve coğrafya ile hissettirilir:**
-  - *Ölçekler* — 1:20 detaydan 1:5000 kent adasına, her ölçekten bir iş
-  - *Kesitler* — tüm projelerden isimsiz küçük görsellerden oluşan bir kontakt sayfası
-  - *Yerler* — İzmir · İstanbul · Antalya · Kuşadası · Denizli · Mersin · Atırav
-  - *Dizin* — tüm çalışmalar tipolojiye göre, kitap sonundaki dizin gibi
-- **Beş derinlemesine inceleme.** Her biri ofisin “doğru soruyu doğru zamanda sormak” ilkesine bağlanan bir soruyla açılır:
+- **Her çalışmanın kendi arazisi var.** Sayfalardaki topoğrafya çizimleri hazır görsel değildir; tarayıcıda, çalışmanın adından türeyen tohumla **kodla üretilir** (`src/lib/land.ts`, `src/scripts/land.ts`). Aynı ad her zaman aynı araziyi verir. Eş yükselti çizgileri birkaç saniyede bir yavaşça akar; arazinin en “derin” yerlerinde (mürekkep lekeleri) çalışmanın siyah-beyaz fotoğrafı görünür. Hareketi azaltma tercihi olan ziyaretçilerde arazi durağandır; ekran dışındayken çizim durur.
+- **Kapak:** büyük logo, “Doğru soru, doğru zamanda.” satırı ve sağda her gün başka bir incelemeyi içinden gösteren arazi. Ofisin tanıtım filmindeki koordinat tabelası (DEMİRCE · ALSANCAK, 38,4304° K · 27,1358° D) sitenin imzasıdır; her incelemenin ve levhanın künyesinde kendi koordinatları yer alır.
+- **Numaralı bölümler** (01 Kapak · 02 Derinlemesine · 03 Ofis · 04 Ölçekler · 05 Kesitler), nokta ızgaraları, ince çizgiler ve siyah bantlar — eski “D’NORMS” arayüz çalışmasından alınan dil.
+- **Sayı yok, seçki var.** Hiçbir yerde proje sayısı verilmez. Birikim *ölçek* (1:20 — 1:5000), *coğrafya* (İzmir — Atırav), *süreklilik* (1999 —), tüm adların tek paragraflık dizini ve isimsiz *kesitler* ile anlatılır.
+- **Beş derinlemesine inceleme**, ofisin “doğru soruyu doğru zamanda sormak” ilkesine bağlanan birer soruyla açılır:
   1. *Bir okul, bir kentin omurgası olabilir mi?* — Mersin Mezitli Eğitim Kampüsü
   2. *Yoğunluk ile konfor bir arada var olabilir mi?* — Fenix84 Antalya
   3. *Rezidans gerçekte nedir?* — Borncity
   4. *Bir yapıya ikinci bir hayat nasıl verilir?* — İlayda Avantgarde Otel
   5. *Bir öğrenci için ev mi, otel mi?* — Coordinat Bornova
-- **Ana sayfa bir gazete ön sayfasıdır (broadsheet):** gazete başlığı ve tarih satırı, iki yanda “kulak”lar (ödüller, çalışılan yerler), manşette günün incelemesi (her gün değişir; devamı iç sayfada), yan sütunda diğer dört soru, ölçekler şeridi, “Ofisten / Notlar / Kayıt” sütunları, tek paragraflık dizin, kesitler ve en altta künye kutusu. Gazete formu her şeyi kısa ama yoğun gösterdiği için birikimi saymadan hissettirir.
-- **Siyah-beyaz arşiv:** tüm görseller gri tonlamalıdır; renk ilgiyle gelir — masaüstünde görselin üzerine gelince, telefonda görsel ekranın ortasındayken yavaşça renklenir. Farklı yıllarda, farklı ekiplerle üretilmiş görseller böylece tek bir arşiv gibi okunur.
-- **Görünüm:** Newsreader (serif) + Inter; arayüz tek renk. Ziyaretçinin sistemine göre otomatik açık/koyu görünüm.
+- **Siyah-beyaz arşiv:** tüm görseller gri tonlamalıdır; renk ilgiyle gelir — masaüstünde görselin üzerine gelince, telefonda görsel ekranın ortasındayken.
+- **Altbilgi** siyah bir banttır: *Yaklaşım* (beş ilke, açılır liste), son *Notlar*, *İletişim* (“Bir sonraki soruyu birlikte soralım.”) ve ofisin kendi arazisi.
+- **Yazı tipleri:** Saira (dar, büyük harf başlıklar), Inter (metin), Newsreader italik (sorular, uzun okuma), JetBrains Mono (koordinat, ölçek, numara). Hepsi siteden sunulur. Türkçe büyük harfte yabancı marka adları korunur (FENİX84 değil FENIX84; `src/lib/text.ts`).
+- **Ad:** Sitede “DEMİRCE” kullanılır. “D’NORMS / DEMİRCE NORMS” adına geçilmek istenirse logo ve `src/data/site.ts` dışında değişiklik gerekmez.
 
 ## Teknik özellikler
-- **Hız:** Statik HTML, harici JavaScript dosyası yok (yalnızca birkaç küçük satır içi betik). Görseller derlemede WebP'ye çevrilip `srcset` ile boyutlandırılır; yazı tipleri siteden sunulur.
+- **Hız:** Statik HTML; tek JavaScript dosyası arazi çizimidir (~6,5 KB, ekrana yaklaşınca çalışır). Görseller derlemede WebP'ye çevrilip `srcset` ile boyutlandırılır; yazı tipleri siteden sunulur.
 - **Akıcı gezinme:** View Transitions ile yumuşak sayfa geçişleri, Speculation Rules ile önceden yüklenen sayfalar.
 - **SEO:** Sayfa başına başlık/açıklama, canonical, `hreflang`, Open Graph görselleri, JSON-LD (LocalBusiness, Article, CreativeWork, BreadcrumbList), site haritası, RSS, robots.txt, web uygulaması manifesti.
 - **Eski adresler korunur:** Eski WordPress adreslerinin tümü (`/portfolio/...`, `/portfolyo/`, blog yazıları, `/feed/`) yeni adreslere **301** ile yönlendirilir (`public/.htaccess`, `public/_redirects`).
@@ -35,7 +34,7 @@ Monografi, mimarlık yayıncılığında tek bir mimarın ya da ofisin işlerini
 
 | TR | EN | İçerik |
 |---|---|---|
-| `/` | `/en/` | Gazete ön sayfası: manşette günün incelemesi, diğer sorular, ölçekler, ofisten / notlar / kayıt, dizin, kesitler, künye |
+| `/` | `/en/` | 01 Kapak (günün arazisi) · 02 Derinlemesine (beş soru) · 03 Ofis (ölçek, coğrafya, süreklilik, ödüller) · 04 Ölçekler · 05 Kesitler (dizin + kesitler) |
 | `/projeler/` | `/en/projects/` | Derinlemesine incelemeler + dizin + kesitler |
 | `/projeler/<slug>/` | `/en/projects/<slug>/` | 5 inceleme (bölümler, numaralı şekiller, künye) veya sade “levha” sayfası |
 | `/ofis/` | `/en/studio/` | Ofis, çalışma biçimi, çalışma alanları, kurucular, kayıt (ödüller, yayınlar, sergiler) |
@@ -64,6 +63,7 @@ src/
     projects.ts    Tüm projeler (TR/EN başlık, özet, metin, künye)
     cases.ts       Beş derinlemesine inceleme: soru, bölümler, şekiller
     monograph.ts   Ölçekler, yerler, dizin grupları
+    approach.ts    Yaklaşım: beş ilke (altbilgi ve Ofis sayfası)
     services.ts    Çalışma alanları (Ofis sayfası)
     archive.ts     Dizindeki diğer çalışmalar
     timeline.ts    Ödüller, sergiler, söyleşiler (Ofis → Kayıt)
@@ -71,9 +71,11 @@ src/
   assets/projects/<slug>/  Proje görselleri (00.webp = kapak)
   views/         Sayfa gövdeleri (TR ve EN ortak)
   pages/         Adresler (TR kök, EN /en/)
-  components/    Şekil, inceleme listesi, ölçekler, kesitler, dizin, logo, KVKK
+  components/    Arazi (Land), sayfa başlığı, şekil, inceleme listesi, ölçekler, kesitler, dizin, logo, KVKK
+  lib/land.ts          Arazi motoru: tohumlu gürültü, eş yükselti çizgileri
+  scripts/land.ts      Arazinin tarayıcıda çizimi ve yavaş akışı
   layouts/Book.astro   Başlık, altbilgi, SEO
-  styles/book.css      Tasarım sistemi
+  styles/book.css      Tasarım sistemi (kâğıt / mürekkep)
 public/
   .htaccess              Apache: yönlendirmeler, güvenlik, önbellek
   _redirects, _headers   Netlify / Cloudflare Pages karşılıkları
@@ -123,6 +125,7 @@ Deponun varsayılan dalına her gönderimde site **https://alpaycoin-1977.github
 - Yerelde aynı derlemeyi denemek için: `SITE_URL=https://alpaycoin-1977.github.io SITE_BASE=/DEMIRCE_WEB PREVIEW=1 npm run build`
 
 ## Yayından önce kontrol edilmesi gerekenler
+- [ ] **Yaklaşım metinleri** (`src/data/approach.ts`): beş ilkenin başlıkları ofisin kendi ifadeleri; kısa açıklamaları yeni yazıldı, gözden geçirin.
 - [ ] **Kurucular / unvanlar** (`src/views/Office.astro`): eski sitedeki yazılardan derlendi; Alpay Demirci ve Burçin Demirci için unvanları doğrulayın.
 - [ ] **İnceleme metinleri ve şekil altyazıları** (`src/data/cases.ts`): eski proje yazılarından genişletildi; bazı tasvirler görsellere bakılarak yazıldı.
 - [ ] **Yüksek çözünürlüklü görseller:** özellikle Mezitli görselleri eski sitede düşük çözünürlüklü; ofisteki asıl görseller monografi düzenini çok güçlendirir.
@@ -132,4 +135,4 @@ Deponun varsayılan dalına her gönderimde site **https://alpaycoin-1977.github
 - [ ] **Posta kodu** (`src/data/site.ts` → `postalCode`).
 - [ ] **İletişim formu:** yayına aldıktan sonra bir deneme mesajı gönderin.
 
-> İlk tasarım denemesi (“Pafta”: 3B güneş çalışması, fizibilite aracı, ilham panosu) git geçmişinde `f33bd9b` işlemesinde durur; gerekirse geri alınabilir.
+> Önceki tasarımlar git geçmişinde durur: ilk deneme “Pafta” (3B güneş çalışması, fizibilite aracı) `f33bd9b`, gazete ön sayfalı “Monografi” `b84050e`.

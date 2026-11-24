@@ -2,6 +2,9 @@
 import { Image } from 'astro:assets';
 import Book from '~/layouts/Book.astro';
 import Fig from '~/components/Fig.astro';
+import Land from '~/components/Land.astro';
+import Name from '~/components/Name.astro';
+import { formatCoords } from '~/lib/text';
 import { cases, ROMAN, type Case } from '~/data/cases';
 import { resolveRef } from '~/data/refs';
 import { getProject, countryName } from '~/data/projects';
@@ -18,6 +21,7 @@ const next = cases[(i + 1) % cases.length];
 const nextP = getProject(next.slug)!;
 const hero = resolveRef(cs.hero, cs.slug);
 const place = [p.district?.[lang], p.city?.[lang]].filter(Boolean).join(', ');
+const coords = p.coords ? formatCoords(p.coords[0], p.coords[1], lang) : undefined;
 const L =
   lang === 'tr'
     ? { deep: 'Derinlemesine', place: 'Yer', year: 'Yıl', client: 'İşveren', award: 'Ödül', status: 'Durum', scope: 'Kapsam', next: 'Sonraki inceleme', index: 'Tüm çalışmalar' }
@@ -58,26 +62,35 @@ const ld = {
   jsonLd={[ld, crumbs]}
 >
   <article>
-    <header class="wrap c-head fade">
-      <p class="small muted">{L.deep} · {ROMAN[i]} / {ROMAN[cases.length - 1]}</p>
-      <h1 class="italic">{cs.question[lang]}</h1>
-      <p class="pname">
-        {p.title[lang]}
-        {(place || p.year) && <span class="muted"> — {[place, p.year].filter(Boolean).join(', ')}</span>}
-      </p>
+    <header class="wrap c-head">
+      <p class="sec-head" aria-hidden="true"><span class="n">{String(i + 1).padStart(2, '0')}</span><b>{L.deep}</b><span class="fill"></span><span class="note">{ROMAN[i]} / {ROMAN[cases.length - 1]}</span></p>
+      <div class="c-grid">
+        <div class="c-text fade">
+          <h1 class="q c-q">{cs.question[lang]}</h1>
+          <p class="pname"><Name text={p.title[lang]} lang={lang} /></p>
+          {(place || p.year) && <p class="pmeta mono">{[place, p.year].filter(Boolean).join(' · ')}</p>}
+          {
+            coords && (
+              <p class="sign c-sign">
+                <b>
+                  <Name text={p.title[lang]} lang={lang} />
+                </b>
+                <span>{coords}</span>
+              </p>
+            )
+          }
+        </div>
+        <Land seed={cs.slug} photo={hero} alt={p.title[lang]} class="c-land" threshold={0.5} bias={0.18} biasCenter={0.4} hair={0.06} />
+      </div>
     </header>
-
-    <figure class={`c-hero ${hero.width < 1400 ? 'c-hero--small' : ''}`}>
-      <Image src={hero} alt={p.title[lang]} widths={[800, 1200, 1600, 2000].filter((w) => w <= hero.width)} sizes="100vw" loading="eager" fetchpriority="high" />
-    </figure>
 
     <div class="wrap">
       <div class="intro">
-        <dl class="facts small">
+        <dl class="facts">
           {
             facts.map(([k, v]) => (
               <div>
-                <dt class="muted">{k}</dt>
+                <dt class="mono muted">{k}</dt>
                 <dd>{v}</dd>
               </div>
             ))
@@ -85,13 +98,19 @@ const ld = {
         </dl>
         <p class="lead">{cs.lead[lang]}</p>
       </div>
+    </div>
 
+    <figure class={`c-hero ${hero.width < 1400 ? 'c-hero--small' : ''}`}>
+      <Image src={hero} alt={p.title[lang]} widths={[800, 1200, 1600, 2000].filter((w) => w <= hero.width)} sizes="100vw" loading="lazy" />
+    </figure>
+
+    <div class="wrap">
       {
         cs.chapters.map((ch, k) => (
           <section class="chapter" aria-labelledby={`ch-${k}`}>
             <div class="ch-text">
               <header class="ch-head">
-                <span class="ch-n small muted">{k + 1}</span>
+                <span class="ch-n mono muted">{String(k + 1).padStart(2, '0')}</span>
                 <h2 id={`ch-${k}`}>{ch.title[lang]}</h2>
               </header>
               <div class="prose">
@@ -110,9 +129,9 @@ const ld = {
 
     <nav class="wrap c-next" aria-label={L.next}>
       <a href={projectUrl(next.slug, lang)} class="next">
-        <span class="small muted">{L.next} — {ROMAN[(i + 1) % cases.length]}</span>
-        <span class="italic nq">{next.question[lang]}</span>
-        <span class="small">{nextP.title[lang]}</span>
+        <span class="label muted">{L.next} — {ROMAN[(i + 1) % cases.length]}</span>
+        <span class="q nq">{next.question[lang]}</span>
+        <span class="nn"><Name text={nextP.title[lang]} lang={lang} /></span>
       </a>
       <a class="arrow-link" href={u(lang === 'tr' ? '/projeler/' : '/en/projects/')}>{L.index}</a>
     </nav>
@@ -121,17 +140,61 @@ const ld = {
 
 <style>
   .c-head {
-    padding-block: clamp(48px, 8vw, 120px) clamp(32px, 4vw, 56px);
+    padding-block: clamp(28px, 3.4vw, 48px) clamp(48px, 6vw, 88px);
   }
-  .c-head h1 {
+  .c-head .sec-head {
+    margin-bottom: clamp(28px, 4vw, 56px);
+  }
+  .c-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 88px);
+    align-items: stretch;
+  }
+  .c-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .c-q {
     font-size: var(--t-xxl);
-    line-height: 1.04;
-    max-width: 14em;
-    margin: 18px 0 24px;
+    line-height: 1;
+    max-width: 13em;
+    margin: 0 0 clamp(28px, 4vw, 56px);
   }
   .pname {
-    font-size: var(--t-l);
+    font-family: var(--display);
+    font-stretch: 68%;
+    font-weight: 560;
+    font-size: var(--t-xl);
+    line-height: 0.92;
+    text-transform: uppercase;
+    margin: auto 0 10px;
+  }
+  .pmeta {
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 0 0 24px;
+  }
+  .c-sign {
     margin: 0;
+  }
+  .c-grid :global(.c-land) {
+    min-height: min(72svh, 760px);
+  }
+  @media (max-width: 860px) {
+    .c-grid {
+      grid-template-columns: 1fr;
+    }
+    .c-grid :global(.c-land) {
+      min-height: 0;
+      aspect-ratio: 4 / 5;
+      max-height: 70svh;
+      order: -1;
+    }
+    .pname {
+      margin-top: 0;
+    }
   }
   .c-hero :global(img) {
     width: 100%;
@@ -147,8 +210,8 @@ const ld = {
     display: grid;
     grid-template-columns: minmax(200px, 1fr) minmax(0, 2fr);
     gap: clamp(24px, 6vw, 96px);
-    padding-block: clamp(48px, 7vw, 104px);
-    border-bottom: 1px solid var(--rule);
+    padding-block: clamp(32px, 4vw, 56px) clamp(56px, 7vw, 104px);
+    border-top: 1px solid var(--ink);
   }
   .facts {
     margin: 0;
@@ -158,16 +221,24 @@ const ld = {
   }
   .facts div {
     display: grid;
-    grid-template-columns: 90px 1fr;
+    grid-template-columns: 84px 1fr;
     gap: 12px;
+    font-size: var(--t-s);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .facts dt {
+    text-transform: uppercase;
+    padding-top: 2px;
   }
   .facts dd {
     margin: 0;
   }
   .lead {
-    font-size: var(--t-xl);
-    line-height: 1.22;
+    font-size: var(--t-l);
+    line-height: 1.36;
     letter-spacing: -0.01em;
+    font-weight: 380;
     margin: 0;
   }
   .chapter {
@@ -188,7 +259,8 @@ const ld = {
     margin-bottom: 8px;
   }
   .ch-head h2 {
-    font-size: var(--t-xl);
+    font-size: var(--t-xxl);
+    line-height: 0.88;
   }
   .prose {
     font-size: var(--t-m);
@@ -213,7 +285,15 @@ const ld = {
   }
   .nq {
     font-size: var(--t-xl);
-    line-height: 1.1;
+    line-height: 1.04;
+  }
+  .nn {
+    font-family: var(--display);
+    font-stretch: 68%;
+    font-weight: 560;
+    font-size: var(--t-l);
+    text-transform: uppercase;
+    line-height: 1;
   }
   .next:hover .nq {
     text-decoration: underline;

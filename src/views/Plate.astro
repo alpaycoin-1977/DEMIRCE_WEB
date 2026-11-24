@@ -2,6 +2,9 @@
 /** LEVHA — derinlemesine incelenmeyen çalışmalar için sade sayfa */
 import { Image } from 'astro:assets';
 import Book from '~/layouts/Book.astro';
+import Land from '~/components/Land.astro';
+import Name from '~/components/Name.astro';
+import { formatCoords } from '~/lib/text';
 import { cases } from '~/data/cases';
 import { projects, countryName, type Project } from '~/data/projects';
 import { projectImages } from '~/lib/images';
@@ -20,10 +23,11 @@ const diagrams = imgs.filter((_, k) => diag.has(k));
 const plates = projects.filter((x) => !cases.some((c) => c.slug === x.slug));
 const next = plates[(plates.indexOf(p) + 1) % plates.length];
 const place = [p.district?.[lang], p.city?.[lang]].filter(Boolean).join(', ');
+const coords = p.coords ? formatCoords(p.coords[0], p.coords[1], lang) : undefined;
 const L =
   lang === 'tr'
-    ? { back: 'Dizine dön', next: 'Sonraki', place: 'Yer', year: 'Yıl', client: 'İşveren', award: 'Ödül', status: 'Durum', scope: 'Kapsam' }
-    : { back: 'Back to index', next: 'Next', place: 'Place', year: 'Year', client: 'Client', award: 'Award', status: 'Status', scope: 'Scope' };
+    ? { index: 'Dizin', back: 'Dizine dön', next: 'Sonraki', place: 'Yer', year: 'Yıl', client: 'İşveren', award: 'Ödül', status: 'Durum', scope: 'Kapsam' }
+    : { index: 'Index', back: 'Back to index', next: 'Next', place: 'Place', year: 'Year', client: 'Client', award: 'Award', status: 'Status', scope: 'Scope' };
 const ld = {
   '@type': 'CreativeWork',
   name: p.title[lang],
@@ -53,20 +57,36 @@ const facts: [string, string][] = [
 
 <Book lang={lang} title={p.title[lang]} description={p.summary[lang]} alternates={{ tr: projectUrl(p.slug, 'tr'), en: projectUrl(p.slug, 'en') }} image={cover} jsonLd={[ld, crumbs]}>
   <article class="wrap">
-    <header class="p-head fade">
-      <a class="small muted back" href={u(lang === 'tr' ? '/projeler/' : '/en/projects/') + '#dizin'}>← {L.back}</a>
-      <h1>{p.title[lang]}</h1>
-      <p class="small muted">{[place, p.year].filter(Boolean).join(' · ')}</p>
+    <header class="p-head">
+      <p class="sec-head" aria-hidden="true"><span class="n">{String(plates.indexOf(p) + 1).padStart(2, '0')}</span><b>{L.index}</b><span class="fill"></span><span class="note">{p.year ?? ''}</span></p>
+      <a class="label muted back" href={u(lang === 'tr' ? '/projeler/' : '/en/projects/') + '#dizin'}>← {L.back}</a>
+      <div class="p-grid">
+        <div>
+          <h1><Name text={p.title[lang]} lang={lang} /></h1>
+          <p class="mono muted pmeta">{[place, countryName(p.country, lang), p.year].filter(Boolean).join(' · ')}</p>
+        </div>
+        {
+          coords && (
+            <p class="sign">
+              <b>
+                <Name text={p.title[lang]} lang={lang} />
+              </b>
+              <span>{coords}</span>
+            </p>
+          )
+        }
+      </div>
     </header>
+    <Land seed={p.slug} class="p-land" threshold={0.58} levels={28} hair={0.86} scale={1.8} />
     <figure class="cover">
       <Image src={cover} alt={p.title[lang]} widths={[800, 1200, 1600, 2000].filter((w) => w <= cover.width)} sizes="(min-width: 1520px) 1400px, 100vw" loading="eager" />
     </figure>
     <div class="body">
-      <dl class="facts small">
+      <dl class="facts">
         {
           facts.map(([k, v]) => (
             <div>
-              <dt class="muted">{k}</dt>
+              <dt class="mono muted">{k}</dt>
               <dd>{v}</dd>
             </div>
           ))
@@ -96,8 +116,8 @@ const facts: [string, string][] = [
     }
     <nav class="p-next">
       <a href={projectUrl(next.slug, lang)}>
-        <span class="small muted">{L.next}</span>
-        <span class="nt">{next.title[lang]}</span>
+        <span class="label muted">{L.next}</span>
+        <span class="nt"><Name text={next.title[lang]} lang={lang} /></span>
       </a>
     </nav>
   </article>
@@ -105,14 +125,37 @@ const facts: [string, string][] = [
 
 <style>
   .p-head {
-    padding-block: clamp(40px, 7vw, 104px) clamp(24px, 3vw, 40px);
+    padding-block: clamp(28px, 3.4vw, 48px) clamp(20px, 2.4vw, 32px);
+  }
+  .p-head .sec-head {
+    margin-bottom: 20px;
   }
   .back {
     text-decoration: none;
   }
+  .p-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: clamp(28px, 4vw, 56px);
+  }
   h1 {
-    font-size: var(--t-xxl);
-    margin: 18px 0 12px;
+    font-size: var(--t-mega);
+    line-height: 0.84;
+    margin: 0 0 16px;
+  }
+  .pmeta {
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .sign {
+    margin: 0;
+  }
+  article :global(.p-land) {
+    height: clamp(120px, 14vw, 200px);
+    margin-bottom: clamp(8px, 1.2vw, 16px);
   }
   .cover :global(img) {
     width: 100%;
@@ -133,15 +176,18 @@ const facts: [string, string][] = [
   }
   .facts div {
     display: grid;
-    grid-template-columns: 90px 1fr;
+    grid-template-columns: 84px 1fr;
     gap: 12px;
+    font-size: var(--t-s);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .facts dt {
+    text-transform: uppercase;
+    padding-top: 2px;
   }
   .facts dd {
     margin: 0;
-  }
-  .prose {
-    font-size: var(--t-l);
-    line-height: 1.45;
   }
   .grid {
     display: grid;
@@ -172,7 +218,12 @@ const facts: [string, string][] = [
     text-decoration: none;
   }
   .nt {
-    font-size: var(--t-xl);
+    font-family: var(--display);
+    font-stretch: 68%;
+    font-weight: 560;
+    font-size: var(--t-xxl);
+    line-height: 0.9;
+    text-transform: uppercase;
   }
   @media (max-width: 860px) {
     .body {

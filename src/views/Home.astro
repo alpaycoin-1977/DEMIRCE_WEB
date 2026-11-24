@@ -1,726 +1,690 @@
 ---
 /**
- * ANA SAYFA — gazete ön sayfası (broadsheet).
- * Gazete formu, her şeyi kısa ama yoğun gösterdiği için birikimi tek tek
- * saymadan hissettirir. Manşet her gün değişen "günün incelemesi"dir;
- * her haber, iç sayfalardaki derinlemesine incelemeye açılır.
+ * ANA SAYFA — "Arazi".
+ * Ofis bir sanat defteri gibi açılır: kâğıt, mürekkep, eş yükselti çizgileri.
+ * Kapaktaki arazi her gün başka bir incelemenin fotoğrafını içinden gösterir.
+ * Birikim sayılarla değil; ölçek, coğrafya ve süreklilikle anlatılır.
  */
 import { Image } from 'astro:assets';
-import { getCollection } from 'astro:content';
 import Book from '~/layouts/Book.astro';
 import Logo from '~/components/Logo.astro';
+import Land from '~/components/Land.astro';
+import Name from '~/components/Name.astro';
 import Mosaic from '~/components/Mosaic.astro';
+import Scales from '~/components/Scales.astro';
 import { cases, ROMAN } from '~/data/cases';
-import { scales, places, indexGroups } from '~/data/monograph';
+import { indexGroups } from '~/data/monograph';
 import { resolveRef } from '~/data/refs';
 import { services } from '~/data/services';
 import { timeline } from '~/data/timeline';
-import { getProject } from '~/data/projects';
-import { projectImages } from '~/lib/images';
+import { getProject, type Category } from '~/data/projects';
 import { SITE } from '~/data/site';
-import { u, projectUrl, postUrl, formatDate, type Lang } from '~/i18n/ui';
+import { landPhoto } from '~/lib/landPhoto';
+import { formatCoords } from '~/lib/text';
+import { u, projectUrl, type Lang } from '~/i18n/ui';
 
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-const now = new Date();
-const years = now.getFullYear() - SITE.founded;
-const notes = (await getCollection('journal', (e) => e.id.startsWith(`${lang}/`) && !e.data.draft))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 5);
+const TYPE: Record<Category, Record<Lang, string>> = {
+  hotel: { tr: 'Konaklama', en: 'Hospitality' },
+  residence: { tr: 'Konut', en: 'Housing' },
+  mixed: { tr: 'Karma kullanım', en: 'Mixed use' },
+  education: { tr: 'Eğitim', en: 'Education' },
+  interior: { tr: 'İç mekân', en: 'Interiors' },
+  competition: { tr: 'Yarışma', en: 'Competition' },
+  industrial: { tr: 'Endüstri', en: 'Industry' },
+};
+const leads = await Promise.all(
+  cases.map(async (cs, i) => {
+    const p = getProject(cs.slug)!;
+    const img = resolveRef(cs.hero, cs.slug);
+    return { cs, p, i, img, photo: await landPhoto(img), type: TYPE[p.categories[0]][lang] };
+  }),
+);
 const awards = timeline.filter((m) => m.kind === 'award').sort((a, b) => b.year - a.year);
 const index = indexGroups().flatMap((g) => g.items);
-const leads = cases.map((cs, i) => {
-  const p = getProject(cs.slug)!;
-  const body = [...cs.chapters[0].body[lang], ...(cs.chapters[1]?.body[lang] ?? [])].slice(0, 3);
-  return { cs, p, i, img: resolveRef(cs.hero, cs.slug), body, place: [p.district?.[lang], p.city?.[lang]].filter(Boolean).join(', ') };
-});
-const short = (s: string, n = 150) => (s.length > n ? s.slice(0, s.lastIndexOf(' ', n)) + '…' : s);
+const coords = formatCoords(SITE.geo.lat, SITE.geo.lon, lang);
+const worksUrl = u(lang === 'tr' ? '/projeler/' : '/en/projects/');
+const officeUrl = u(lang === 'tr' ? '/ofis/' : '/en/studio/');
+const heroOpts = leads.map((l) => ({ seed: l.cs.slug, photo: l.photo, alt: l.p.title[lang] }));
 
 const c =
   lang === 'tr'
     ? {
-        city: 'İzmir · Alsancak',
-        year: `Yıl ${years}`,
-        since: `${SITE.founded}’dan beri`,
-        tagline: 'Mimarlık · İç mimarlık · Peyzaj',
-        awards: 'Ödüller',
-        places: 'Çalışılan yerler',
+        q1: 'Doğru soru,',
+        q2: 'doğru zamanda.',
+        statement: `DEMİRCE, ${SITE.founded}’dan bu yana İzmir’de çalışan bir mimarlık ofisidir. Bir otel odasının detayından bir kent adasına kadar her ölçekte; mimariyi, iç mekânı ve peyzajı tek bir düşünce altında ele alır.`,
+        explore: 'Çalışmaları keşfet',
+        office: 'Ofis',
+        scroll: 'Kaydır',
+        inside: 'Arazinin içinden',
+        landNote: 'Her çalışmanın adından türeyen bir arazi. Çizgiler yavaşça akar; en derin yerlerde çalışmanın kendisi görünür.',
         deep: 'Derinlemesine',
-        more: 'Devamı: İncelemenin tamamı',
-        others: 'Diğer sorular',
+        deepNote: 'Beş çalışma, beş soru',
+        read: 'İncelemeyi oku',
+        officeH: 'Ofis',
+        officeNote: `${SITE.founded} —`,
+        officeText: 'Her iş aynı yerden başlar: arazinin topoğrafyasını, güneşi, rüzgârı ve orada yaşayacak insanları okumak. Projeleri mekânı tanımlayan adımlar olarak görür, tek bir konsept altında şekillendiririz.',
+        about: 'Ofis hakkında',
+        facts: [
+          { k: 'Ölçek', v: '1:20 — 1:5000', n: 'Bir otel odasının detayından bir kent adasına' },
+          { k: 'Coğrafya', v: 'İzmir — Atırav', n: 'Ege’den Hazar kıyısına' },
+          { k: 'Süreklilik', v: `${SITE.founded} —`, n: 'Aynı soruyla: doğru soru, doğru zamanda' },
+        ],
+        areas: 'Alanlar',
+        awards: 'Ödüller',
         scales: 'Ölçekler',
         scalesNote: 'Detaydan kente',
-        fromOffice: 'Ofisten',
-        statement: `DEMİRCE, ${SITE.founded}’dan bu yana İzmir’de çalışan bir mimarlık ofisidir. Bir otel odasının detayından bir kentsel dönüşüm adasına kadar her ölçekte; mimariyi, iç mekânı ve peyzajı tek bir düşünce altında ele alır. Her işe aynı yerden başlar: doğru soruyu doğru zamanda sormak.`,
-        areas: 'Çalışma alanları',
-        office: 'Ofis hakkında',
-        notes: 'Notlar',
-        allNotes: 'Tüm notlar',
-        record: 'Kayıt',
-        index: 'Dizin',
-        indexNote: 'Seçilmiş çalışmalar',
-        allWorks: 'Tüm çalışmalar',
         cuts: 'Kesitler',
-        cutsNote: `${SITE.founded}’dan bu yana üretilen işlerden`,
-        imprint: 'Künye',
-        imprintRows: [
-          ['Yayımlayan', 'DEMİRCE Mimarlık'],
-          ['Kuruluş', `${SITE.founded}, İzmir`],
-          ['Kurucular', 'Alpay Demirci, Burçin Demirci'],
-          ['Çalışma alanları', services.map((s) => s.title.tr).join(', ')],
-          ['Yönetim yeri', `${SITE.address.street}, ${SITE.address.district} / ${SITE.address.city}`],
-          ['İletişim', `${SITE.phone} · ${SITE.email}`],
-          ['Yayın dili', 'Türkçe · English'],
-        ],
+        cutsNote: `${SITE.founded}’dan bu yana`,
+        all: 'Tüm çalışmalar',
       }
     : {
-        city: 'İzmir · Alsancak',
-        year: `Year ${years}`,
-        since: `Since ${SITE.founded}`,
-        tagline: 'Architecture · Interiors · Landscape',
-        awards: 'Awards',
-        places: 'Places',
+        q1: 'The right question,',
+        q2: 'at the right time.',
+        statement: `DEMİRCE is an architecture studio that has worked from İzmir since ${SITE.founded}. From the detail of a hotel room to a city block, it treats architecture, interiors and landscape as a single idea.`,
+        explore: 'Explore the work',
+        office: 'Studio',
+        scroll: 'Scroll',
+        inside: 'From inside the land',
+        landNote: 'A landscape grown from each project’s name. The lines drift slowly; in the deepest places the work itself appears.',
         deep: 'In depth',
-        more: 'Continued: read the full study',
-        others: 'Other questions',
+        deepNote: 'Five works, five questions',
+        read: 'Read the study',
+        officeH: 'Studio',
+        officeNote: `${SITE.founded} —`,
+        officeText: 'Every project starts in the same place: reading the topography, the sun, the wind and the people who will live there. We see projects as steps that define a space, shaped under a single concept.',
+        about: 'About the studio',
+        facts: [
+          { k: 'Scale', v: '1:20 — 1:5000', n: 'From the detail of a hotel room to a city block' },
+          { k: 'Geography', v: 'İzmir — Atyrau', n: 'From the Aegean to the Caspian shore' },
+          { k: 'Continuity', v: `${SITE.founded} —`, n: 'The same question: the right one, at the right time' },
+        ],
+        areas: 'Areas',
+        awards: 'Awards',
         scales: 'Scales',
         scalesNote: 'From detail to city',
-        fromOffice: 'From the studio',
-        statement: `DEMİRCE is an architecture studio that has worked from İzmir since ${SITE.founded}. From the detail of a hotel room to an urban regeneration block, it treats architecture, interiors and landscape as a single idea — starting every project in the same place: asking the right question at the right time.`,
-        areas: 'Areas of work',
-        office: 'About the studio',
-        notes: 'Notes',
-        allNotes: 'All notes',
-        record: 'Record',
-        index: 'Index',
-        indexNote: 'Selected works',
-        allWorks: 'All works',
         cuts: 'Fragments',
-        cutsNote: `From work produced since ${SITE.founded}`,
-        imprint: 'Imprint',
-        imprintRows: [
-          ['Published by', 'DEMİRCE Mimarlık'],
-          ['Founded', `${SITE.founded}, İzmir`],
-          ['Founders', 'Alpay Demirci, Burçin Demirci'],
-          ['Areas of work', services.map((s) => s.title.en).join(', ')],
-          ['Office', `${SITE.address.street}, ${SITE.address.district} / ${SITE.address.city}`],
-          ['Contact', `${SITE.phone} · ${SITE.email}`],
-          ['Languages', 'Türkçe · English'],
-        ],
+        cutsNote: `Since ${SITE.founded}`,
+        all: 'All works',
       };
-const worksUrl = u(lang === 'tr' ? '/projeler/' : '/en/projects/');
-const officeUrl = u(lang === 'tr' ? '/ofis/' : '/en/studio/');
-const notesUrl = u(lang === 'tr' ? '/gunluk/' : '/en/journal/');
 ---
 
-<Book lang={lang} alternates={{ tr: '/', en: '/en/' }} hideBrand>
-  <div class="wrap paper">
-    <!-- Gazete başlığı -->
-    <header class="masthead">
-      <aside class="ear">
-        <p class="np-kicker">{c.awards}</p>
-        <ul>
-          {
-            awards.map((a) => (
-              <li>
-                <span class="muted">{a.year}</span> {a.title[lang]}
-              </li>
-            ))
-          }
-        </ul>
-      </aside>
-      <a href={u(lang === 'tr' ? '/' : '/en/')} class="nameplate" aria-label={SITE.name}>
-        <h1 class="sr-only">{SITE.name}</h1>
-        <Logo variant="full" />
-      </a>
-      <aside class="ear ear--r">
-        <p class="np-kicker">{c.places}</p>
-        <p>{places.map((p) => p[lang]).join(' · ')}</p>
-      </aside>
-    </header>
-    <div class="dateline">
-      <span>{c.city}</span>
-      <time data-today data-lang={lang} datetime={now.toISOString().slice(0, 10)}>{formatDate(now, lang)}</time>
-      <span>{c.year} · {c.since}</span>
-    </div>
-
-    <!-- Manşet + yan sütun -->
-    <div class="front">
-      <div class="leads">
-        {
-          leads.map((l) => (
-            <article class="lead" data-lead={l.i} hidden={l.i !== 0}>
-              <p class="np-kicker">
-                {c.deep} · {ROMAN[l.i]} <span class="kn">— {l.p.title[lang]}</span>
-              </p>
-              <h2 class="headline">
-                <a href={projectUrl(l.cs.slug, lang)}>{l.cs.question[lang]}</a>
-              </h2>
-              <p class="deck">{l.cs.lead[lang]}</p>
-              <figure class="lead-fig">
-                <a href={projectUrl(l.cs.slug, lang)}>
-                  <Image
-                    src={l.img}
-                    alt={l.p.title[lang]}
-                    widths={[640, 960, 1400].filter((w) => w <= l.img.width).concat(l.img.width < 640 ? [l.img.width] : [])}
-                    sizes="(min-width: 1100px) 900px, 100vw"
-                    loading={l.i === 0 ? 'eager' : 'lazy'}
-                  />
-                </a>
-                <figcaption>
-                  {l.p.title[lang]}
-                  {l.place && ` — ${l.place}`}
-                  {l.p.year && `, ${l.p.year}`}
-                </figcaption>
-              </figure>
-              <div class="body">
-                {l.body.map((para, k) => (
-                  <p class={k === 0 ? 'drop' : ''}>{para}</p>
-                ))}
-                <p class="cont">
-                  <a href={projectUrl(l.cs.slug, lang)}>{c.more} →</a>
-                </p>
-              </div>
-            </article>
-          ))
-        }
+<Book lang={lang} alternates={{ tr: '/', en: '/en/' }}>
+  <!-- 01 · Kapak -->
+  <section class="hero wrap" aria-labelledby="h-name">
+    <div class="h-text">
+      <p class="h-meta mono" aria-hidden="true">
+        <span>01</span><span class="h-fill"></span><span>DEMİRCE · ALSANCAK</span>
+      </p>
+      <h1 id="h-name" class="h-name">
+        <span class="sr-only">{SITE.name}</span>
+        <span aria-hidden="true"><Logo variant="wordmark" /></span>
+      </h1>
+      <p class="h-sub label">{lang === 'tr' ? 'Mimarlık · İç mimarlık · Peyzaj' : 'Architecture · Interiors · Landscape'}</p>
+      <p class="q h-q">{c.q1}<br />{c.q2}</p>
+      <p class="h-st">{c.statement}</p>
+      <div class="h-cta">
+        <a class="arrow-link" href={worksUrl}>{c.explore}</a>
+        <a class="h-office label" href={officeUrl}>{c.office}</a>
       </div>
+      <p class="h-sign sign" aria-hidden="true"><b>DEMİRCE · ALSANCAK</b><span>{coords}</span></p>
+      <span class="h-scroll mono" aria-hidden="true">{c.scroll}</span>
+    </div>
 
-      <aside class="side" aria-label={c.others}>
-        <p class="np-kicker side-head">{c.others}</p>
+    <figure class="h-fig">
+      <Land id="hero-land" seed={leads[0].cs.slug} photo={leads[0].img} alt={leads[0].p.title[lang]} class="h-land" threshold={0.5} bias={0.2} biasCenter={0.45} biasY={0.12} hair={0.08} />
+      <figcaption class="h-cap">
         {
           leads.map((l) => (
-            <article class="brief" data-side={l.i} hidden={l.i === 0}>
-              <a href={projectUrl(l.cs.slug, lang)}>
-                <Image src={l.img} alt="" widths={[240, 480]} sizes="160px" loading="lazy" class="brief-img" />
-                <span class="np-kicker">
-                  {c.deep} · {ROMAN[l.i]}
-                </span>
-                <h3>{l.cs.question[lang]}</h3>
-                <p>{short(l.cs.lead[lang])}</p>
-                <span class="small muted">{l.p.title[lang]}</span>
+            <p data-cap hidden={l.i !== 0}>
+              <span class="cap-k">
+                {c.inside} — {ROMAN[l.i]} / {ROMAN[cases.length - 1]}
+              </span>
+              <a href={projectUrl(l.cs.slug, lang)} class="cap-name">
+                <Name text={l.p.title[lang]} lang={lang} />
               </a>
-            </article>
+              <span class="cap-q q">{l.cs.question[lang]}</span>
+            </p>
           ))
         }
-      </aside>
-    </div>
-    <script is:inline>
+        <span class="cap-note">{c.landNote}</span>
+      </figcaption>
+    </figure>
+    <script is:inline define:vars={{ heroOpts }}>
       (function () {
         var d = new Date();
-        var day = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5);
-        var leads = document.querySelectorAll('[data-lead]');
-        var k = day % leads.length;
-        leads.forEach(function (el, i) {
-          el.hidden = i !== k;
-          if (i === k) {
-            var img = el.querySelector('img');
-            if (img) img.loading = 'eager';
-          }
+        var k = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5) % heroOpts.length;
+        var el = document.getElementById('hero-land');
+        if (!el || k === 0) return;
+        el.dataset.seed = heroOpts[k].seed;
+        el.dataset.photo = heroOpts[k].photo;
+        el.setAttribute('aria-label', heroOpts[k].alt);
+        document.querySelectorAll('[data-cap]').forEach(function (p, i) {
+          p.hidden = i !== k;
         });
-        document.querySelectorAll('[data-side]').forEach(function (el, i) {
-          el.hidden = i === k;
-        });
-        var t = document.querySelector('[data-today]');
-        if (t) {
-          var en = t.getAttribute('data-lang') === 'en';
-          t.textContent = d.toLocaleDateString(en ? 'en-GB' : 'tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        }
       })();
     </script>
+  </section>
 
-    <!-- Ölçekler şeridi -->
-    <section class="band" aria-labelledby="h-scales">
-      <h2 id="h-scales" class="band-head"><span class="np-kicker">{c.scales}</span><span class="small muted">{c.scalesNote}</span></h2>
-      <ol class="scales">
+  <!-- 02 · Derinlemesine -->
+  <section class="night deep" aria-labelledby="h-deep">
+    <div class="wrap">
+      <h2 id="h-deep" class="sec-head"><span class="n">02</span><b>{c.deep}</b><span class="fill"></span><span class="note">{c.deepNote}</span></h2>
+      <ol class="cards">
         {
-          scales.map((s) => {
-            const p = getProject(s.slug)!;
-            return (
-              <li>
-                <a href={projectUrl(s.slug, lang)}>
-                  <Image src={projectImages(s.slug)[s.image]} alt={p.title[lang]} widths={[240, 480]} sizes="(min-width: 900px) 16vw, 45vw" loading="lazy" />
-                  <span class="ratio">{s.ratio}</span>
-                  <span class="small">
-                    {s.name[lang]} — <span class="muted">{p.title[lang]}</span>
+          leads.map((l) => (
+            <li class="card">
+              <a href={projectUrl(l.cs.slug, lang)}>
+                <span class="c-top mono">
+                  <span>{String(l.i + 1).padStart(2, '0')}</span>
+                  <span>{ROMAN[l.i]}</span>
+                </span>
+                <span class="c-img">
+                  <Image src={l.img} alt="" widths={[360, 560, 800].filter((w) => w <= l.img.width)} sizes="(min-width: 1100px) 19vw, (min-width: 700px) 45vw, 82vw" loading="lazy" />
+                  <span class="c-q q">{l.cs.question[lang]}</span>
+                </span>
+                <span class="c-name">
+                  <span>
+                    <Name text={l.p.title[lang]} lang={lang} />
                   </span>
-                </a>
-              </li>
-            );
-          })
-        }
-      </ol>
-    </section>
-
-    <!-- Üç sütun -->
-    <div class="cols3">
-      <section aria-labelledby="h-office">
-        <h2 id="h-office" class="np-kicker">{c.fromOffice}</h2>
-        <p class="statement">{c.statement}</p>
-        <p class="np-kicker sub">{c.areas}</p>
-        <ul class="plain">{services.map((s) => <li>{s.title[lang]}</li>)}</ul>
-        <a class="arrow-link" href={officeUrl}>{c.office}</a>
-      </section>
-      <section aria-labelledby="h-notes">
-        <h2 id="h-notes" class="np-kicker">{c.notes}</h2>
-        <ul class="notes">
-          {
-            notes.map((n) => (
-              <li>
-                <a href={postUrl(n.id.split('/')[1], lang)}>
-                  <time class="small muted" datetime={n.data.date.toISOString()}>
-                    {formatDate(n.data.date, lang)}
-                  </time>
-                  <span class="nt">{n.data.title}</span>
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-        <a class="arrow-link" href={notesUrl}>{c.allNotes}</a>
-      </section>
-      <section aria-labelledby="h-record">
-        <h2 id="h-record" class="np-kicker">{c.record}</h2>
-        <ul class="record">
-          {
-            timeline
-              .filter((m) => m.year !== SITE.founded && m.kind !== 'build')
-              .sort((a, b) => b.year - a.year)
-              .map((m) => (
-                <li>
-                  <span class="small muted">{m.year}</span>
-                  <span>{m.title[lang]}</span>
-                </li>
-              ))
-          }
-        </ul>
-      </section>
-    </div>
-
-    <!-- Dizin: tüm adlar, tek paragrafta -->
-    <section class="band" aria-labelledby="h-index">
-      <h2 id="h-index" class="band-head"><span class="np-kicker">{c.index}</span><span class="small muted">{c.indexNote}</span></h2>
-      <p class="index-run">
-        {
-          index.map((e, k) => (
-            <>
-              {e.slug ? <a href={projectUrl(e.slug, lang)}>{e.name[lang]}</a> : <span>{e.name[lang]}</span>}
-              {e.place && <span class="muted"> ({e.place[lang].split(/ · |, /).pop()})</span>}
-              {k < index.length - 1 && <span class="sep"> · </span>}
-            </>
+                  <span class="c-plus" aria-hidden="true" />
+                </span>
+                <span class="c-meta mono">{[l.type, l.p.city?.[lang], l.p.year].filter(Boolean).join(' · ')}</span>
+              </a>
+            </li>
           ))
         }
-      </p>
-      <a class="arrow-link" href={`${worksUrl}#dizin`}>{c.allWorks}</a>
-    </section>
+      </ol>
+    </div>
+  </section>
 
-    <!-- Kesitler -->
-    <section class="band" aria-labelledby="h-cuts">
-      <h2 id="h-cuts" class="band-head"><span class="np-kicker">{c.cuts}</span><span class="small muted">{c.cutsNote}</span></h2>
-      <Mosaic lang={lang} count={24} />
-    </section>
-
-    <!-- Künye -->
-    <section class="imprint" aria-labelledby="h-imprint">
-      <h2 id="h-imprint" class="np-kicker">{c.imprint}</h2>
-      <dl>
+  <!-- 03 · Ofis -->
+  <section class="wrap section office" aria-labelledby="h-office">
+    <h2 id="h-office" class="sec-head"><span class="n">03</span><b>{c.officeH}</b><span class="fill"></span><span class="note">{c.officeNote}</span></h2>
+    <div class="o-grid">
+      <div class="o-text">
+        <p class="o-big">{c.officeText}</p>
+        <a class="arrow-link" href={officeUrl}>{c.about}</a>
+      </div>
+      <Land seed="demirce-ofis-1999" class="o-land" threshold={0.55} levels={34} hair={0.62} scale={2} />
+      <dl class="o-facts">
         {
-          c.imprintRows.map(([k, v]) => (
+          c.facts.map((f) => (
             <div>
-              <dt>{k}</dt>
-              <dd>{v}</dd>
+              <dt class="label muted">{f.k}</dt>
+              <dd class="display fv">{f.v}</dd>
+              <dd class="small muted">{f.n}</dd>
             </div>
           ))
         }
+        <div>
+          <dt class="label muted">{c.areas}</dt>
+          <dd class="small">{services.map((s) => s.title[lang]).join(' · ')}</dd>
+        </div>
+        <div>
+          <dt class="label muted">{c.awards}</dt>
+          {
+            awards.map((a) => (
+              <dd class="small">
+                <span class="mono muted">{a.year}</span> {a.title[lang]}
+              </dd>
+            ))
+          }
+        </div>
       </dl>
-    </section>
-  </div>
+    </div>
+  </section>
+
+  <!-- 04 · Ölçekler -->
+  <section class="night section" aria-labelledby="h-scales">
+    <div class="wrap">
+      <h2 id="h-scales" class="sec-head"><span class="n">04</span><b>{c.scales}</b><span class="fill"></span><span class="note">{c.scalesNote}</span></h2>
+      <Scales lang={lang} />
+    </div>
+  </section>
+
+  <!-- 05 · Kesitler -->
+  <section class="wrap section cuts" aria-labelledby="h-cuts">
+    <h2 id="h-cuts" class="sec-head"><span class="n">05</span><b>{c.cuts}</b><span class="fill"></span><span class="note">{c.cutsNote}</span></h2>
+    <p class="index-run">
+      {
+        index.map((e, k) => (
+          <>
+            {e.slug ? (
+              <a href={projectUrl(e.slug, lang)}>
+                <Name text={e.name[lang]} lang={lang} />
+              </a>
+            ) : (
+              <span>
+                <Name text={e.name[lang]} lang={lang} />
+              </span>
+            )}
+            {k < index.length - 1 && <span class="sep"> / </span>}
+          </>
+        ))
+      }
+    </p>
+    <Mosaic lang={lang} count={24} />
+    <p class="cuts-more"><a class="arrow-link" href={`${worksUrl}#dizin`}>{c.all}</a></p>
+  </section>
 </Book>
 
 <style>
-  .paper {
-    padding-top: clamp(8px, 1.5vw, 20px);
+  /* ---------- 01 Kapak ---------- */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 72px);
+    padding-block: clamp(24px, 3vw, 44px) clamp(56px, 7vw, 104px);
+    min-height: calc(100svh - var(--header-h));
   }
-  .kn {
-    text-transform: none;
-    letter-spacing: 0;
-    font-weight: 500;
-    font-size: 0.8rem;
+  .h-text {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .h-meta {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    margin: 0 0 clamp(28px, 4vw, 56px);
     color: var(--muted);
   }
-  .np-kicker {
-    font-family: var(--sans);
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--ink);
-    margin: 0 0 10px;
+  .h-fill {
+    height: 7px;
+    background-image: radial-gradient(circle, currentColor 0.8px, transparent 1.2px);
+    background-size: 7px 7px;
+    opacity: 0.7;
   }
-
-  /* Gazete başlığı */
-  .masthead {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr) minmax(0, 1fr);
-    align-items: center;
-    gap: clamp(16px, 3vw, 40px);
-    padding-block: clamp(12px, 2vw, 28px);
+  .h-name {
+    width: 100%;
+    margin: 0;
+    line-height: 0;
   }
-  .nameplate {
-    display: block;
-    color: var(--ink);
-  }
-  .nameplate :global(.logo) {
+  .h-name :global(.logo) {
     width: 100%;
     height: auto;
-  }
-  .ear {
-    align-self: stretch;
-    border: 1px solid var(--rule-2);
-    padding: 10px 12px;
-    font-size: 0.78rem;
-    line-height: 1.35;
-  }
-  .ear ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 4px;
-  }
-  .ear p:last-child {
-    margin: 0;
-  }
-  .dateline {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 8px 0;
-    border-top: 5px double var(--ink);
-    border-bottom: 1px solid var(--ink);
-    font-family: var(--sans);
-    font-size: 0.75rem;
-  }
-  .dateline time {
-    font-weight: 600;
-  }
-
-  /* Manşet ve yan sütun */
-  .front {
-    display: grid;
-    grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
-    gap: 0;
-    padding-block: clamp(20px, 3vw, 36px);
-    border-bottom: 1px solid var(--ink);
-  }
-  .leads {
-    padding-right: clamp(20px, 3vw, 40px);
-    border-right: 1px solid var(--rule-2);
-  }
-  .headline {
-    font-weight: 620;
-    font-size: clamp(2.4rem, 1.4rem + 4vw, 5.4rem);
-    line-height: 1;
-    letter-spacing: -0.025em;
-    margin: 4px 0 18px;
-  }
-  .headline a {
-    text-decoration: none;
-  }
-  .headline a:hover {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-  }
-  .deck {
-    font-size: var(--t-l);
-    line-height: 1.35;
-    color: var(--ink-2);
-    max-width: 40em;
-    margin-bottom: 20px;
-  }
-  .lead-fig :global(img) {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-  }
-  .lead-fig figcaption {
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--rule);
-  }
-  .body {
-    columns: 2 260px;
-    column-gap: 32px;
-    column-rule: 1px solid var(--rule);
-    margin-top: 18px;
-    font-size: 0.98rem;
-    line-height: 1.55;
-    text-align: justify;
-    hyphens: auto;
-  }
-  .body p {
-    margin-bottom: 0.8em;
-  }
-  .drop::first-letter {
-    float: left;
-    font-size: 3.6em;
-    line-height: 0.82;
-    font-weight: 600;
-    padding: 6px 8px 0 0;
-  }
-  .cont {
-    font-family: var(--sans);
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-align: left;
-  }
-  .side {
-    padding-left: clamp(20px, 3vw, 40px);
-  }
-  .side-head {
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--ink);
-  }
-  .brief {
-    padding: 14px 0;
-    border-bottom: 1px solid var(--rule);
-  }
-  .brief:last-child {
-    border-bottom: 0;
-  }
-  .brief a {
     display: block;
-    text-decoration: none;
   }
-  .brief a::after {
+  .h-sub {
+    margin: 18px 0 0;
+    color: var(--ink-2);
+  }
+  .h-q {
+    font-size: clamp(2.2rem, 1.2rem + 3.4vw, 4.6rem);
+    line-height: 0.98;
+    margin: clamp(36px, 4.4vw, 72px) 0 clamp(20px, 2.4vw, 28px);
+  }
+  .h-st {
+    max-width: 31em;
+    color: var(--ink-2);
+    margin-bottom: 32px;
+  }
+  .h-cta {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .h-office {
+    text-decoration: none;
+    color: var(--muted);
+  }
+  .h-office:hover {
+    color: var(--ink);
+  }
+  .h-sign {
+    margin: clamp(40px, 5vw, 72px) 0 0;
+  }
+  .h-scroll {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    writing-mode: vertical-rl;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+  }
+  .h-scroll::after {
     content: '';
-    display: block;
-    clear: both;
+    display: inline-block;
+    width: 1px;
+    height: 56px;
+    margin-top: 12px;
+    background: currentColor;
   }
-  .brief :global(.brief-img) {
-    float: right;
-    width: 112px;
-    aspect-ratio: 1;
-    object-fit: cover;
-    margin: 0 0 8px 14px;
+  .h-fig {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
-  .brief h3 {
-    font-weight: 600;
-    font-size: 1.28rem;
-    line-height: 1.15;
-    margin: 0 0 8px;
+  .h-fig :global(.h-land) {
+    flex: 1;
+    min-height: min(74svh, 820px);
   }
-  .brief a:hover h3 {
+  .h-cap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    gap: 4px 24px;
+    padding-top: 12px;
+    border-top: 1px solid var(--ink);
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    color: var(--muted);
+  }
+  .h-cap p {
+    display: grid;
+    gap: 3px;
+    margin: 0;
+  }
+  .cap-k {
+    text-transform: uppercase;
+  }
+  .cap-name {
+    font-family: var(--display);
+    font-stretch: 68%;
+    font-weight: 560;
+    font-size: 1.35rem;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+  .cap-name:hover {
     text-decoration: underline;
+    text-underline-offset: 0.15em;
   }
-  .brief p {
-    font-size: 0.9rem;
-    line-height: 1.45;
+  .cap-q {
+    font-size: 1.05rem;
     color: var(--ink-2);
-    margin-bottom: 6px;
+    letter-spacing: 0;
+  }
+  .cap-note {
+    font-family: var(--sans);
+    letter-spacing: 0;
+    line-height: 1.5;
+    align-self: end;
+  }
+  @media (max-width: 960px) {
+    .hero {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-height: 0;
+    }
+    .h-fig,
+    .h-text {
+      display: contents;
+    }
+    .h-meta {
+      order: 1;
+      margin-bottom: 20px;
+    }
+    .h-name {
+      order: 2;
+    }
+    .h-sub {
+      order: 3;
+      margin-top: 10px;
+    }
+    .h-fig :global(.h-land) {
+      order: 4;
+      flex: none;
+      min-height: 0;
+      aspect-ratio: 4 / 5;
+      max-height: 76svh;
+      width: 100%;
+      margin-top: 24px;
+    }
+    .h-cap {
+      order: 5;
+      grid-template-columns: 1fr;
+    }
+    .h-q {
+      order: 6;
+      margin-top: 48px;
+    }
+    .h-st {
+      order: 7;
+    }
+    .h-cta {
+      order: 8;
+    }
+    .h-sign {
+      order: 9;
+      align-self: flex-start;
+    }
+    .h-scroll {
+      display: none;
+    }
   }
 
-  /* Bantlar */
-  .band {
-    padding-block: 22px 26px;
-    border-bottom: 1px solid var(--ink);
+  /* ---------- 02 Derinlemesine ---------- */
+  .deep {
+    padding-block: clamp(64px, 8vw, 120px) clamp(72px, 9vw, 136px);
   }
-  .band-head {
+  .cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: clamp(14px, 1.6vw, 24px);
+  }
+  .card a {
+    position: relative;
+    display: grid;
+    gap: 12px;
+    text-decoration: none;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule-2);
+  }
+  .c-top {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    margin: 0 0 14px;
-    font-weight: 400;
+    color: var(--muted);
   }
-  .band-head .np-kicker {
-    margin: 0;
+  .c-img {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--night-2);
   }
-  .scales {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+  .c-img :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    transition:
+      filter 0.9s var(--ease),
+      transform 1.4s var(--ease);
+  }
+  .c-q {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 56px 14px 14px;
+    font-size: clamp(1.1rem, 0.9rem + 0.5vw, 1.45rem);
+    line-height: 1.08;
+    color: #f3f2ee;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.85), transparent);
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.5s var(--ease),
+      transform 0.6s var(--ease);
+  }
+  @media (hover: hover) {
+    .card a:hover .c-q,
+    .card a:focus-visible .c-q {
+      opacity: 1;
+      transform: none;
+    }
+    .card a:hover .c-img :global(img) {
+      transform: scale(1.03);
+    }
+  }
+  @media (hover: none) {
+    .c-q {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .c-name {
+    font-family: var(--display);
+    font-stretch: 68%;
+    font-weight: 560;
+    font-size: clamp(1.3rem, 1rem + 0.8vw, 1.85rem);
+    line-height: 0.95;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     gap: 16px;
   }
-  .scales a {
-    display: grid;
-    gap: 6px;
-    text-decoration: none;
+  .c-meta {
+    color: var(--muted);
+    text-transform: uppercase;
   }
-  .scales :global(img) {
-    width: 100%;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
+  .c-plus {
+    position: relative;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin-top: 0.12em;
   }
-  .ratio {
-    font-size: 1.6rem;
-    font-weight: 500;
-    line-height: 1;
+  .c-plus::before,
+  .c-plus::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 7px;
+    height: 1px;
+    background: currentColor;
+    transition: transform 0.45s var(--ease);
   }
-
-  /* Üç sütun */
-  .cols3 {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    border-bottom: 1px solid var(--ink);
+  .c-plus::after {
+    transform: rotate(90deg);
   }
-  .cols3 > section {
-    padding: 22px clamp(16px, 2.4vw, 32px) 26px;
-    border-left: 1px solid var(--rule-2);
+  .card a:hover .c-plus::before {
+    transform: rotate(45deg);
   }
-  .cols3 > section:first-child {
-    border-left: 0;
-    padding-left: 0;
+  .card a:hover .c-plus::after {
+    transform: rotate(135deg);
   }
-  .cols3 > section:last-child {
-    padding-right: 0;
+  @media (max-width: 1100px) {
+    .cards {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(240px, 42%);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 16px;
+      margin-inline: calc(-1 * var(--gutter));
+      padding-inline: var(--gutter);
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: thin;
+    }
+    .card {
+      scroll-snap-align: start;
+    }
   }
-  .cols3 h2 {
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--ink);
-  }
-  .statement {
-    font-size: 1.05rem;
-    line-height: 1.5;
-  }
-  .sub {
-    margin-top: 18px;
-  }
-  .plain,
-  .notes,
-  .record {
-    list-style: none;
-    margin: 0 0 16px;
-    padding: 0;
-  }
-  .plain li {
-    padding: 3px 0;
-    font-size: 0.95rem;
-  }
-  .notes a {
-    display: grid;
-    gap: 2px;
-    padding: 9px 0;
-    border-bottom: 1px solid var(--rule);
-    text-decoration: none;
-  }
-  .nt {
-    font-weight: 560;
-    line-height: 1.25;
-  }
-  .notes a:hover .nt {
-    text-decoration: underline;
-  }
-  .record li {
-    display: grid;
-    grid-template-columns: 44px 1fr;
-    gap: 8px;
-    padding: 7px 0;
-    border-bottom: 1px solid var(--rule);
-    font-size: 0.92rem;
-    line-height: 1.35;
+  @media (max-width: 640px) {
+    .cards {
+      grid-auto-columns: 78%;
+    }
   }
 
-  /* Dizin */
+  /* ---------- 03 Ofis ---------- */
+  .o-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr) minmax(0, 0.95fr);
+    gap: clamp(28px, 4vw, 72px);
+    align-items: start;
+  }
+  .o-big {
+    font-size: var(--t-l);
+    line-height: 1.32;
+    letter-spacing: -0.01em;
+    font-weight: 380;
+    margin-bottom: 32px;
+  }
+  .o-grid :global(.o-land) {
+    aspect-ratio: 3 / 4;
+  }
+  .o-facts {
+    margin: 0;
+    display: grid;
+  }
+  .o-facts div {
+    padding-block: 16px;
+    border-top: 1px solid var(--rule);
+  }
+  .o-facts div:first-child {
+    border-top: 1px solid var(--ink);
+    padding-top: 12px;
+  }
+  .o-facts dd {
+    margin: 4px 0 0;
+  }
+  .fv {
+    font-size: clamp(1.9rem, 1.3rem + 1.6vw, 2.9rem);
+    margin-top: 6px !important;
+  }
+  @media (max-width: 1000px) {
+    .o-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .o-text {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 640px) {
+    .o-grid {
+      grid-template-columns: 1fr;
+    }
+    .o-grid :global(.o-land) {
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  /* ---------- 05 Kesitler ---------- */
   .index-run {
-    font-size: 1.05rem;
-    line-height: 1.7;
-    margin-bottom: 12px;
+    font-family: var(--display);
+    font-stretch: 68%;
+    font-weight: 520;
+    text-transform: uppercase;
+    font-size: clamp(1.4rem, 1rem + 1.5vw, 2.4rem);
+    line-height: 1.12;
+    letter-spacing: 0.005em;
+    margin: 0 0 clamp(40px, 5vw, 72px);
+    max-width: 68em;
   }
   .index-run a {
     text-decoration: none;
-    border-bottom: 1px solid var(--rule-2);
   }
   .index-run a:hover {
-    border-color: var(--ink);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.12em;
   }
-  .index-run .muted {
-    font-size: 0.85em;
+  .index-run > span:not(.sep) {
+    color: var(--muted);
   }
   .sep {
     color: var(--muted);
+    font-weight: 300;
   }
-
-  /* Künye */
-  .imprint {
-    margin-top: 32px;
-    padding: 16px 18px;
-    border: 1px solid var(--ink);
-    max-width: 760px;
+  .cuts {
+    padding-bottom: 0;
   }
-  .imprint h2 {
-    margin-bottom: 10px;
-  }
-  .imprint dl {
-    margin: 0;
-    display: grid;
-    gap: 4px;
-  }
-  .imprint div {
-    display: grid;
-    grid-template-columns: 150px 1fr;
-    gap: 12px;
-    font-size: 0.85rem;
-    line-height: 1.4;
-  }
-  .imprint dt {
-    font-family: var(--sans);
-    font-size: 0.72rem;
-    color: var(--muted);
-    padding-top: 2px;
-  }
-  .imprint dd {
-    margin: 0;
-  }
-
-  @media (max-width: 1000px) {
-    .masthead {
-      grid-template-columns: 1fr;
-    }
-    .ear {
-      display: none;
-    }
-    .front,
-    .cols3 {
-      grid-template-columns: 1fr;
-    }
-    .leads {
-      padding-right: 0;
-      border-right: 0;
-    }
-    .side {
-      padding-left: 0;
-      margin-top: 24px;
-    }
-    .cols3 > section {
-      border-left: 0;
-      padding-inline: 0;
-      border-top: 1px solid var(--rule-2);
-    }
-    .cols3 > section:first-child {
-      border-top: 0;
-    }
-    .scales {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-  @media (max-width: 600px) {
-    .dateline {
-      flex-direction: column;
-      gap: 2px;
-      text-align: center;
-    }
-    .scales {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .body {
-      text-align: left;
-    }
-    .imprint div {
-      grid-template-columns: 1fr;
-      gap: 0;
-    }
+  .cuts-more {
+    margin: 32px 0 0;
   }
 </style>

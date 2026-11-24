@@ -20,8 +20,8 @@ export const SITE = {
     country: 'TR',
     countryName: { tr: 'Türkiye', en: 'Türkiye' },
   },
-  /** Alsancak ofisi — güneş çalışması ve haritada kullanılır */
-  geo: { lat: 38.4335, lon: 27.1428 },
+  /** Alsancak ofisi — ofisin kendi tanıtım görselindeki koordinatlar */
+  geo: { lat: 38.4304, lon: 27.1358 },
   /** İzmir saat dilimi: UTC+3 (Europe/Istanbul, yaz saati uygulaması yok) */
   utcOffset: 3,
   social: {
