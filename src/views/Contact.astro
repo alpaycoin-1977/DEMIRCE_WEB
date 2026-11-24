@@ -1,7 +1,7 @@
 ---
 import Book from '~/layouts/Book.astro';
 import { SITE } from '~/data/site';
-import type { Lang } from '~/i18n/ui';
+import { u, type Lang } from '~/i18n/ui';
 
 interface Props {
   lang: Lang;
@@ -31,14 +31,14 @@ const c =
 
   <section class="wrap section" aria-labelledby="h-w">
     <h2 id="h-w" class="kicker"><b>{c.write}</b></h2>
-    <form class="form" method="post" action={SITE.formEndpoint} novalidate data-form data-email={SITE.email} data-m={JSON.stringify(c)}>
+    <form class="form" method="post" action={u(SITE.formEndpoint)} novalidate data-form data-email={SITE.email} data-m={JSON.stringify(c)}>
       <label><span class="small muted">{c.name}</span><input name="name" required maxlength="120" autocomplete="name" /></label>
       <label><span class="small muted">{c.email}</span><input name="email" type="email" required maxlength="160" autocomplete="email" /></label>
       <label class="full"><span class="small muted">{c.msg}</span><textarea name="message" rows="6" required minlength="10" maxlength="6000"></textarea></label>
       <input type="hidden" name="subject" value={lang === 'tr' ? 'Web sitesi' : 'Website'} />
       <input type="hidden" name="lang" value={lang} />
       <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off" /></div>
-      <label class="check full small"><input type="checkbox" name="consent" required /> <span>{c.consent} <a href={lang === 'tr' ? '/kvkk/' : '/en/privacy/'}>{c.link}</a> {c.end}</span></label>
+      <label class="check full small"><input type="checkbox" name="consent" required /> <span>{c.consent} <a href={u(lang === 'tr' ? '/kvkk/' : '/en/privacy/')}>{c.link}</a> {c.end}</span></label>
       <div class="full row"><button type="submit">{c.send}</button><span class="small status" role="status" aria-live="polite" data-status></span></div>
     </form>
   </section>

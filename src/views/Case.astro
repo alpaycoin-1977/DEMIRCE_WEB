@@ -5,7 +5,7 @@ import Fig from '~/components/Fig.astro';
 import { cases, ROMAN, type Case } from '~/data/cases';
 import { resolveRef } from '~/data/refs';
 import { getProject, countryName } from '~/data/projects';
-import { projectUrl, type Lang } from '~/i18n/ui';
+import { u, projectUrl, type Lang } from '~/i18n/ui';
 
 interface Props {
   cs: Case;
@@ -34,7 +34,7 @@ let figN = 0;
 const crumbs = {
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: lang === 'tr' ? 'Çalışmalar' : 'Works', item: new URL(lang === 'tr' ? '/projeler/' : '/en/projects/', Astro.site).href },
+    { '@type': 'ListItem', position: 1, name: lang === 'tr' ? 'Çalışmalar' : 'Works', item: new URL(u(lang === 'tr' ? '/projeler/' : '/en/projects/'), Astro.site).href },
     { '@type': 'ListItem', position: 2, name: p.title[lang], item: new URL(projectUrl(cs.slug, lang), Astro.site).href },
   ],
 };
@@ -114,7 +114,7 @@ const ld = {
         <span class="italic nq">{next.question[lang]}</span>
         <span class="small">{nextP.title[lang]}</span>
       </a>
-      <a class="arrow-link" href={lang === 'tr' ? '/projeler/' : '/en/projects/'}>{L.index}</a>
+      <a class="arrow-link" href={u(lang === 'tr' ? '/projeler/' : '/en/projects/')}>{L.index}</a>
     </nav>
   </article>
 </Book>

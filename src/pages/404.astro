@@ -1,13 +1,14 @@
 ---
 import Book from '~/layouts/Book.astro';
+import { u } from '~/i18n/ui';
 ---
 
 <Book lang="tr" title="Sayfa bulunamadı" alternates={{ tr: '/', en: '/en/' }} noindex>
   <section class="wrap nf">
     <p class="small muted">404</p>
     <h1 class="italic">Aradığınız sayfa burada değil.</h1>
-    <p>Sayfa taşınmış ya da kaldırılmış olabilir. <a href="/projeler/">Çalışmalar</a> sayfasından ya da <a href="/">ana sayfadan</a> devam edebilirsiniz.</p>
-    <p class="small muted">This page could not be found. <a href="/en/">English</a></p>
+    <p>Sayfa taşınmış ya da kaldırılmış olabilir. <a href={u('/projeler/')}>Çalışmalar</a> sayfasından ya da <a href={u('/')}>ana sayfadan</a> devam edebilirsiniz.</p>
+    <p class="small muted">This page could not be found. <a href={u('/en/')}>English</a></p>
   </section>
 </Book>
 

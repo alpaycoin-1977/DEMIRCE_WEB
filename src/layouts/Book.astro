@@ -6,7 +6,7 @@ import type { ImageMetadata } from 'astro';
 import Logo from '~/components/Logo.astro';
 import { SITE } from '~/data/site';
 import { projectCover } from '~/lib/images';
-import type { Lang } from '~/i18n/ui';
+import { u, logical, PREVIEW, type Lang } from '~/i18n/ui';
 
 interface Props {
   lang: Lang;
@@ -45,18 +45,20 @@ const T = {
     privacy: 'Privacy',
   },
 }[lang];
-const base = lang === 'tr' ? '' : '/en';
+const home = u(lang === 'tr' ? '/' : '/en/');
 const nav = [
-  { href: lang === 'tr' ? '/projeler/' : '/en/projects/', label: T.works },
-  { href: lang === 'tr' ? '/ofis/' : '/en/studio/', label: T.office },
-  { href: lang === 'tr' ? '/gunluk/' : '/en/journal/', label: T.notes },
-  { href: lang === 'tr' ? '/iletisim/' : '/en/contact/', label: T.contact },
+  { href: u(lang === 'tr' ? '/projeler/' : '/en/projects/'), label: T.works },
+  { href: u(lang === 'tr' ? '/ofis/' : '/en/studio/'), label: T.office },
+  { href: u(lang === 'tr' ? '/gunluk/' : '/en/journal/'), label: T.notes },
+  { href: u(lang === 'tr' ? '/iletisim/' : '/en/contact/'), label: T.contact },
 ];
 const path = Astro.url.pathname;
 const other = lang === 'tr' ? 'en' : 'tr';
 const fullTitle = title ? `${title} — DEMİRCE` : `DEMİRCE Mimarlık — ${T.tagline}`;
 const desc = description ?? T.desc;
-const canonical = new URL(path, SITE.url).href;
+// canonical ve hreflang her zaman gerçek site adresini gösterir
+const canonical = new URL(logical(path), SITE.url).href;
+const alt = { tr: logical(alternates.tr), en: logical(alternates.en) };
 const og = await getImage({ src: image ?? projectCover('mezitli-egitim-kampusu'), width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 78 });
 const org = {
   '@context': 'https://schema.org',
@@ -83,15 +85,15 @@ const year = new Date().getFullYear();
     <title>{fullTitle}</title>
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex" />}
-    <link rel="alternate" hreflang="tr" href={new URL(alternates.tr, SITE.url).href} />
-    <link rel="alternate" hreflang="en" href={new URL(alternates.en, SITE.url).href} />
-    <link rel="alternate" hreflang="x-default" href={new URL(alternates.tr, SITE.url).href} />
-    <link rel="alternate" type="application/rss+xml" title="DEMİRCE" href={lang === 'tr' ? '/rss.xml' : '/en/rss.xml'} />
+    {(noindex || PREVIEW) && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="alternate" hreflang="tr" href={new URL(alt.tr, SITE.url).href} />
+    <link rel="alternate" hreflang="en" href={new URL(alt.en, SITE.url).href} />
+    <link rel="alternate" hreflang="x-default" href={new URL(alt.tr, SITE.url).href} />
+    <link rel="alternate" type="application/rss+xml" title="DEMİRCE" href={u(lang === 'tr' ? '/rss.xml' : '/en/rss.xml')} />
     <link rel="preload" href={serifWoff} as="font" type="font/woff2" crossorigin />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={u('/apple-touch-icon.png')} />
+    <link rel="manifest" href={u('/manifest.webmanifest')} />
     <noscript><style>@media (max-width: 760px) { .head-bar { height: auto !important; flex-wrap: wrap; padding-block: 14px; } .nav-btn { display: none !important; } .nav { width: 100%; margin: 0 !important; } .nav ul { display: flex !important; position: static !important; flex-direction: row !important; flex-wrap: wrap; gap: 4px 18px !important; padding: 0 !important; border: 0 !important; background: none !important; font-family: var(--sans) !important; font-size: 0.875rem !important; } .nav ul a { padding: 4px 0 !important; } }</style></noscript>
     <meta name="theme-color" content="#f5f3ee" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#131211" media="(prefers-color-scheme: dark)" />
@@ -100,7 +102,7 @@ const year = new Date().getFullYear();
     <meta property="og:title" content={title ?? SITE.name} />
     <meta property="og:description" content={desc} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={new URL(og.src, SITE.url).href} />
+    <meta property="og:image" content={new URL(og.src, Astro.site).href} />
     <meta property="og:locale" content={lang === 'tr' ? 'tr_TR' : 'en_GB'} />
     <meta name="twitter:card" content="summary_large_image" />
     <script type="application/ld+json" set:html={JSON.stringify(org)} />
@@ -114,7 +116,7 @@ const year = new Date().getFullYear();
     <a class="skip" href="#icerik">{T.skip}</a>
     <header class="site-head">
       <div class="wrap head-bar">
-        <a href={`${base}/`} class="brand" aria-label={`${SITE.name}`}><Logo variant="full" /></a>
+        <a href={home} class="brand" aria-label={`${SITE.name}`}><Logo variant="full" /></a>
         {running && <span class="running small muted" aria-hidden="true">{running}</span>}
         <nav class="nav" aria-label={T.menu}>
           <button type="button" class="nav-btn small" aria-expanded="false" aria-controls="nav-list">{T.menu}</button>
@@ -129,7 +131,7 @@ const year = new Date().getFullYear();
                 ))
               }
               <li>
-                <a href={alternates[other]} hreflang={other} lang={other} class="lang">{other.toUpperCase()}</a>
+                <a href={u(alt[other])} hreflang={other} lang={other} class="lang">{other.toUpperCase()}</a>
               </li>
           </ul>
         </nav>
@@ -159,7 +161,7 @@ const year = new Date().getFullYear();
         </p>
         <p class="small muted colophon">
           © {SITE.founded}–{year} DEMİRCE Mimarlık<br />
-          <a href={lang === 'tr' ? '/kvkk/' : '/en/privacy/'}>{T.privacy}</a>
+          <a href={u(lang === 'tr' ? '/kvkk/' : '/en/privacy/')}>{T.privacy}</a>
         </p>
       </div>
     </footer>

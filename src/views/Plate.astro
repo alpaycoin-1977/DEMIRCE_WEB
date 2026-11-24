@@ -5,7 +5,7 @@ import Book from '~/layouts/Book.astro';
 import { cases } from '~/data/cases';
 import { projects, countryName, type Project } from '~/data/projects';
 import { projectImages } from '~/lib/images';
-import { projectUrl, type Lang } from '~/i18n/ui';
+import { u, projectUrl, type Lang } from '~/i18n/ui';
 
 interface Props {
   project: Project;
@@ -37,7 +37,7 @@ const ld = {
 const crumbs = {
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: lang === 'tr' ? 'Çalışmalar' : 'Works', item: new URL(lang === 'tr' ? '/projeler/' : '/en/projects/', Astro.site).href },
+    { '@type': 'ListItem', position: 1, name: lang === 'tr' ? 'Çalışmalar' : 'Works', item: new URL(u(lang === 'tr' ? '/projeler/' : '/en/projects/'), Astro.site).href },
     { '@type': 'ListItem', position: 2, name: p.title[lang], item: new URL(projectUrl(p.slug, lang), Astro.site).href },
   ],
 };
@@ -54,7 +54,7 @@ const facts: [string, string][] = [
 <Book lang={lang} title={p.title[lang]} description={p.summary[lang]} alternates={{ tr: projectUrl(p.slug, 'tr'), en: projectUrl(p.slug, 'en') }} image={cover} jsonLd={[ld, crumbs]}>
   <article class="wrap">
     <header class="p-head fade">
-      <a class="small muted back" href={(lang === 'tr' ? '/projeler/' : '/en/projects/') + '#dizin'}>← {L.back}</a>
+      <a class="small muted back" href={u(lang === 'tr' ? '/projeler/' : '/en/projects/') + '#dizin'}>← {L.back}</a>
       <h1>{p.title[lang]}</h1>
       <p class="small muted">{[place, p.year].filter(Boolean).join(' · ')}</p>
     </header>

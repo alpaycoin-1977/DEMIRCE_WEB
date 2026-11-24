@@ -10,7 +10,7 @@ import { places } from '~/data/monograph';
 import { resolveRef } from '~/data/refs';
 import { getProject } from '~/data/projects';
 import { SITE } from '~/data/site';
-import { projectUrl, postUrl, formatDate, type Lang } from '~/i18n/ui';
+import { u, projectUrl, postUrl, formatDate, type Lang } from '~/i18n/ui';
 
 interface Props {
   lang: Lang;
@@ -61,7 +61,7 @@ const openings = cases.map((cs, i) => {
   const p = getProject(cs.slug)!;
   return { cs, p, i, img: resolveRef(cs.hero, cs.slug), place: [p.district?.[lang], p.city?.[lang]].filter(Boolean).join(', ') };
 });
-const worksUrl = lang === 'tr' ? '/projeler/' : '/en/projects/';
+const worksUrl = u(lang === 'tr' ? '/projeler/' : '/en/projects/');
 ---
 
 <Book lang={lang} alternates={{ tr: '/', en: '/en/' }}>
@@ -106,7 +106,7 @@ const worksUrl = lang === 'tr' ? '/projeler/' : '/en/projects/';
   <section class="wrap statement">
     <p class="st-1">{c.statement[0]}</p>
     <p class="st-2">{c.statement[1]}</p>
-    <a class="arrow-link" href={lang === 'tr' ? '/ofis/' : '/en/studio/'}>{c.office}</a>
+    <a class="arrow-link" href={u(lang === 'tr' ? '/ofis/' : '/en/studio/')}>{c.office}</a>
   </section>
 
   <section class="wrap section" aria-labelledby="h-deep">
@@ -131,7 +131,7 @@ const worksUrl = lang === 'tr' ? '/projeler/' : '/en/projects/';
   </section>
 
   <section class="wrap section" aria-labelledby="h-notes">
-    <h2 id="h-notes" class="kicker"><b>{c.notes}</b><a class="arrow-link" href={lang === 'tr' ? '/gunluk/' : '/en/journal/'}>{c.allNotes}</a></h2>
+    <h2 id="h-notes" class="kicker"><b>{c.notes}</b><a class="arrow-link" href={u(lang === 'tr' ? '/gunluk/' : '/en/journal/')}>{c.allNotes}</a></h2>
     <ul class="notes">
       {
         notes.map((n) => (

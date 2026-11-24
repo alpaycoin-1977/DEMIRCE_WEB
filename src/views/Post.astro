@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import { render, type CollectionEntry } from 'astro:content';
 import Book from '~/layouts/Book.astro';
 import { getProject } from '~/data/projects';
-import { postUrl, projectUrl, formatDate, type Lang } from '~/i18n/ui';
+import { u, postUrl, projectUrl, formatDate, type Lang } from '~/i18n/ui';
 
 interface Props {
   post: CollectionEntry<'journal'>;
@@ -26,7 +26,7 @@ const project = post.data.project ? getProject(post.data.project) : undefined;
 >
   <article class="wrap post">
     <header class="head">
-      <a class="small muted back" href={lang === 'tr' ? '/gunluk/' : '/en/journal/'}>← {lang === 'tr' ? 'Notlar' : 'Notes'}</a>
+      <a class="small muted back" href={u(lang === 'tr' ? '/gunluk/' : '/en/journal/')}>← {lang === 'tr' ? 'Notlar' : 'Notes'}</a>
       <time class="small muted" datetime={post.data.date.toISOString()}>{formatDate(post.data.date, lang)}</time>
       <h1>{post.data.title}</h1>
       <p class="lead">{post.data.description}</p>
