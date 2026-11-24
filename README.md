@@ -119,6 +119,38 @@ GitHub Actions (`.github/workflows/ci.yml`) her gönderimde tip denetimi ve derl
 
 ---
 
+## Alternatif tasarım — “Monografi” (`alt/`)
+
+Aynı içerik, farklı bir bakış açısı. Birinci sürüm (“Pafta”) ofisin araçlarını ve etkileşimi öne çıkarır; **Monografi** ise köklü bir ofisin kendini kanıtlama ihtiyacı duymayan sessiz özgüvenini hedefler. Site, ofisin monografi kitabı gibi okunur.
+
+| | Pafta (`src/`) | Monografi (`alt/`) |
+|---|---|---|
+| Ton | Teknik, etkileşimli, enerjik | Sakin, editoryal, kendinden emin |
+| Tipografi | Saira (dar) + JetBrains Mono | Newsreader (serif) + Inter |
+| Renk | Macenta vurgu, 3 tema | Neredeyse tek renk; renk projelerden gelir |
+| Birikimi anlatma | Rakamlar, sayaçlar, harita | **Sayı yok:** ölçekler (1:20 → 1:5000), kesitler (kontakt sayfası), dizin, yerler |
+| Projeler | 16 proje eşit ağırlıkta kartlar | **5 derinlemesine inceleme** (her biri bir soruyla açılır) + dizin + sade “levha” sayfaları |
+| Ek araçlar | Güneş çalışması, fizibilite, ilham panosu, ⌘K | Yok — yalnızca iş ve metin |
+
+**Derinlemesine incelemeler** (`alt/data/cases.ts`):
+1. *Bir okul, bir kentin omurgası olabilir mi?* — Mersin Mezitli Eğitim Kampüsü
+2. *Yoğunluk ile konfor bir arada var olabilir mi?* — Fenix84 Antalya
+3. *Rezidans gerçekte nedir?* — Borncity
+4. *Bir yapıya ikinci bir hayat nasıl verilir?* — İlayda Avantgarde Otel
+5. *Bir öğrenci için ev mi, otel mi?* — Coordinat Bornova
+
+Proje verileri, görseller, günlük yazıları, iletişim formu, KVKK metni ve yönlendirmeler iki sürümde ortaktır; adres yapısı (`/projeler/…`, `/ofis/`, `/gunluk/…`, `/iletisim/`) aynıdır.
+
+```bash
+npm run dev:alt       # http://localhost:4321 — Monografi
+npm run build:alt     # dist-alt/ klasörüne derler
+npm run preview:alt   # http://localhost:4322
+```
+
+Yayına almak için `dist/` yerine `dist-alt/` klasörünün içeriğini yükleyin.
+
+---
+
 ## Yayından önce kontrol edilmesi gerekenler
 - [ ] **Kurucular / unvanlar** (`src/views/OfficePage.astro`): eski sitedeki yazılardan derlendi — Alpay Demirci ve Burçin Demirci için unvanları doğrulayın, isterseniz fotoğraf ekleyin.
 - [ ] **Arşiv** (`src/data/archive.ts`) ve **zaman çizelgesi** (`src/data/timeline.ts`): eski blog kayıtlarından derlendi; yıllar, haber tarihleridir.

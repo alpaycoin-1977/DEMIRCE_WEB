@@ -1,0 +1,23 @@
+---
+import Book from '@alt/layouts/Book.astro';
+---
+
+<Book lang="tr" title="Sayfa bulunamadı" alternates={{ tr: '/', en: '/en/' }} noindex>
+  <section class="wrap nf">
+    <p class="small muted">404</p>
+    <h1 class="italic">Aradığınız sayfa burada değil.</h1>
+    <p>Sayfa taşınmış ya da kaldırılmış olabilir. <a href="/projeler/">Çalışmalar</a> sayfasından ya da <a href="/">ana sayfadan</a> devam edebilirsiniz.</p>
+    <p class="small muted">This page could not be found. <a href="/en/">English</a></p>
+  </section>
+</Book>
+
+<style>
+  .nf {
+    padding-block: clamp(80px, 14vw, 200px);
+    max-width: 900px;
+  }
+  h1 {
+    font-size: var(--t-xxl);
+    margin: 12px 0 24px;
+  }
+</style>

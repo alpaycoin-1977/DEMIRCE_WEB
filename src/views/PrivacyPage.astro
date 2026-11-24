@@ -5,7 +5,7 @@
  * ofisin gerçek veri işleme süreçlerine göre güncelleyin.
  */
 import Base from '~/layouts/Base.astro';
-import { SITE } from '~/data/site';
+import PrivacyContent from '~/components/PrivacyContent.astro';
 import { formatDate, type Lang } from '~/i18n/ui';
 
 interface Props {
@@ -21,49 +21,7 @@ const updated = formatDate(new Date('2026-11-23'), lang);
     <h1 class="display">{lang === 'tr' ? 'KVKK & Gizlilik' : 'Privacy'}</h1>
   </div>
   <div class="wrap">
-    {
-      lang === 'tr' ? (
-        <div class="prose">
-          <p>
-            Bu metin, 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) uyarınca, veri sorumlusu sıfatıyla <strong>{SITE.name}</strong> ({SITE.address.street}, {SITE.address.district} / {SITE.address.city}) tarafından www.demirce.com ziyaretçilerini bilgilendirmek amacıyla hazırlanmıştır.
-          </p>
-          <h2>İşlenen kişisel veriler</h2>
-          <p>İletişim formunu kullandığınızda paylaştığınız ad-soyad, e-posta adresi, telefon numarası (isteğe bağlı), mesaj içeriği ve — tercih etmeniz hâlinde — ilham panonuzun bağlantısı işlenir.</p>
-          <h2>İşleme amaçları ve hukuki sebep</h2>
-          <p>Verileriniz yalnızca talebinizi yanıtlamak, sizinle iletişime geçmek ve olası iş ilişkisine dair ön görüşmeleri yürütmek amacıyla; KVKK m.5/2 (c) “bir sözleşmenin kurulması veya ifasıyla doğrudan ilgili olması” ve (f) “veri sorumlusunun meşru menfaati” hukuki sebeplerine dayanılarak işlenir.</p>
-          <h2>Aktarım</h2>
-          <p>Verileriniz pazarlama amacıyla üçüncü kişilerle paylaşılmaz. Form mesajları, sitenin barındırıldığı sunucu ve e-posta hizmet sağlayıcısı aracılığıyla ofisimize iletilir.</p>
-          <h2>Saklama süresi</h2>
-          <p>Veriler, talebinizin karşılanması için gereken süre ve ilgili mevzuatta öngörülen zamanaşımı süreleri boyunca saklanır; sonrasında silinir veya anonim hâle getirilir.</p>
-          <h2>Haklarınız</h2>
-          <p>KVKK m.11 uyarınca verilerinizin işlenip işlenmediğini öğrenme, bilgi talep etme, düzeltilmesini veya silinmesini isteme, itiraz etme ve zararın giderilmesini talep etme haklarına sahipsiniz. Başvurularınızı <a href={`mailto:${SITE.email}`}>{SITE.email}</a> adresine iletebilirsiniz.</p>
-          <h2>Çerezler ve yerel depolama</h2>
-          <p>
-            Bu site <strong>çerez kullanmaz</strong> ve ziyaretçi takibi / reklam amaçlı analiz aracı içermez. Yazı tipleri sitenin kendi sunucusundan yüklenir; harita ve sosyal medya içerikleri gömülmez. Tema tercihiniz ve ilham panonuz yalnızca tarayıcınızın yerel depolama alanında (localStorage) tutulur, sunucuya gönderilmez ve tarayıcı ayarlarınızdan dilediğiniz zaman silinebilir.
-          </p>
-        </div>
-      ) : (
-        <div class="prose">
-          <p>
-            This notice is provided by <strong>{SITE.name}</strong> ({SITE.address.street}, {SITE.address.district} / {SITE.address.city}) as data controller under Turkish Personal Data Protection Law No. 6698 (“KVKK”) to inform visitors of www.demirce.com.
-          </p>
-          <h2>Data we process</h2>
-          <p>When you use the contact form we process your name, email address, phone number (optional), the content of your message and — if you choose — a link to your mood board.</p>
-          <h2>Purpose and legal basis</h2>
-          <p>Your data is processed solely to answer your request, contact you and carry out preliminary discussions about a potential engagement, on the legal bases of KVKK art. 5/2 (c) and (f).</p>
-          <h2>Transfers</h2>
-          <p>We do not share your data with third parties for marketing. Form messages reach our studio via the website’s hosting server and email provider.</p>
-          <h2>Retention</h2>
-          <p>Data is kept for as long as needed to handle your request and for the limitation periods required by law, after which it is deleted or anonymised.</p>
-          <h2>Your rights</h2>
-          <p>Under KVKK art. 11 you may ask whether your data is processed, request information, correction or deletion, object, and claim compensation. Contact us at <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
-          <h2>Cookies and local storage</h2>
-          <p>
-            This website <strong>uses no cookies</strong> and contains no tracking or advertising analytics. Fonts are self-hosted; maps and social media content are not embedded. Your theme preference and mood board are stored only in your browser’s local storage, are never sent to our server and can be cleared in your browser settings at any time.
-          </p>
-        </div>
-      )
-    }
+    <PrivacyContent lang={lang} />
   </div>
 </Base>
 
@@ -75,7 +33,7 @@ const updated = formatDate(new Date('2026-11-23'), lang);
     font-size: var(--step-5);
     margin-top: 18px;
   }
-  .prose {
+  .wrap :global(.prose) {
     font-size: var(--step-1);
   }
 </style>

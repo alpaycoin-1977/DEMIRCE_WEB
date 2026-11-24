@@ -1,0 +1,260 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Book from '@alt/layouts/Book.astro';
+import CaseList from '@alt/components/CaseList.astro';
+import Scales from '@alt/components/Scales.astro';
+import Mosaic from '@alt/components/Mosaic.astro';
+import { cases, ROMAN } from '@alt/data/cases';
+import { places } from '@alt/data/monograph';
+import { resolveRef } from '@alt/data/refs';
+import { getProject } from '~/data/projects';
+import { SITE } from '~/data/site';
+import { projectUrl, postUrl, formatDate, type Lang } from '~/i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const notes = (await getCollection('journal', (e) => e.id.startsWith(`${lang}/`) && !e.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 4);
+const c =
+  lang === 'tr'
+    ? {
+        statement: [
+          `DEMİRCE, ${SITE.founded}’dan bu yana İzmir’de çalışan bir mimarlık ofisidir.`,
+          'Bir otel odasının detayından bir kentsel dönüşüm adasına kadar her ölçekte; mimariyi, iç mekânı ve peyzajı tek bir düşünce altında ele alırız. Her işe aynı yerden başlarız: doğru soruyu doğru zamanda sormak.',
+        ],
+        office: 'Ofis hakkında',
+        deep: 'Derinlemesine',
+        deepNote: 'Beş çalışma, beş soru',
+        scales: 'Ölçekler',
+        scalesNote: 'Detaydan kente',
+        cuts: 'Kesitler',
+        cutsNote: `${SITE.founded}’dan bu yana üretilen işlerden`,
+        index: 'Tüm çalışmaların dizini',
+        places: 'Çalışılan yerler',
+        notes: 'Notlar',
+        allNotes: 'Tüm notlar',
+        read: 'İncelemeyi oku',
+      }
+    : {
+        statement: [
+          `DEMİRCE is an architecture studio that has worked from İzmir since ${SITE.founded}.`,
+          'From the detail of a hotel room to an urban regeneration block, we treat architecture, interiors and landscape as a single idea. Every project starts in the same place: asking the right question at the right time.',
+        ],
+        office: 'About the studio',
+        deep: 'In depth',
+        deepNote: 'Five works, five questions',
+        scales: 'Scales',
+        scalesNote: 'From detail to city',
+        cuts: 'Fragments',
+        cutsNote: `From work produced since ${SITE.founded}`,
+        index: 'Index of all works',
+        places: 'Places we have worked',
+        notes: 'Notes',
+        allNotes: 'All notes',
+        read: 'Read the study',
+      };
+const openings = cases.map((cs, i) => {
+  const p = getProject(cs.slug)!;
+  return { cs, p, i, img: resolveRef(cs.hero, cs.slug), place: [p.district?.[lang], p.city?.[lang]].filter(Boolean).join(', ') };
+});
+const worksUrl = lang === 'tr' ? '/projeler/' : '/en/projects/';
+---
+
+<Book lang={lang} alternates={{ tr: '/', en: '/en/' }}>
+  <!-- Açılış: günün görseli (her gün farklı bir inceleme) -->
+  <section class="wrap opening">
+    {
+      openings.map((o) => (
+        <figure class="open-fig fade" data-open={o.i} hidden={o.i !== 0}>
+          <a href={projectUrl(o.cs.slug, lang)} class="open-img">
+            <Image src={o.img} alt={o.p.title[lang]} widths={[800, 1200, 1600, 2000].filter((w) => w <= o.img.width)} sizes="(min-width: 1520px) 1400px, 100vw" loading={o.i === 0 ? 'eager' : 'lazy'} fetchpriority={o.i === 0 ? 'high' : 'auto'} />
+          </a>
+          <figcaption class="open-cap">
+            <span class="small">
+              <span class="ink">{ROMAN[o.i]} — {o.p.title[lang]}</span>
+              <span class="muted">
+                {o.place}
+                {o.p.year ? `, ${o.p.year}` : ''}
+              </span>
+            </span>
+            <a href={projectUrl(o.cs.slug, lang)} class="open-q italic">{o.cs.question[lang]}</a>
+          </figcaption>
+        </figure>
+      ))
+    }
+    <script is:inline>
+      (function () {
+        var figs = document.querySelectorAll('[data-open]');
+        var d = new Date();
+        var day = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5);
+        var k = day % figs.length;
+        figs.forEach(function (f, i) {
+          f.hidden = i !== k;
+          if (i === k) {
+            var img = f.querySelector('img');
+            if (img) img.loading = 'eager';
+          }
+        });
+      })();
+    </script>
+  </section>
+
+  <section class="wrap statement">
+    <p class="st-1">{c.statement[0]}</p>
+    <p class="st-2">{c.statement[1]}</p>
+    <a class="arrow-link" href={lang === 'tr' ? '/ofis/' : '/en/studio/'}>{c.office}</a>
+  </section>
+
+  <section class="wrap section" aria-labelledby="h-deep">
+    <h2 id="h-deep" class="kicker"><b>{c.deep}</b><span>{c.deepNote}</span></h2>
+    <CaseList lang={lang} />
+  </section>
+
+  <section class="wrap section" aria-labelledby="h-scale">
+    <h2 id="h-scale" class="kicker"><b>{c.scales}</b><span>{c.scalesNote}</span></h2>
+    <Scales lang={lang} />
+  </section>
+
+  <section class="wrap section" aria-labelledby="h-cuts">
+    <h2 id="h-cuts" class="kicker"><b>{c.cuts}</b><span>{c.cutsNote}</span></h2>
+    <Mosaic lang={lang} />
+    <p class="after"><a class="arrow-link" href={`${worksUrl}#dizin`}>{c.index}</a></p>
+  </section>
+
+  <section class="wrap places" aria-labelledby="h-places">
+    <h2 id="h-places" class="kicker"><b>{c.places}</b><span>{SITE.founded}—</span></h2>
+    <p class="place-line">{places.map((p, i) => <span>{p[lang]}{i < places.length - 1 && <i aria-hidden="true"> · </i>}</span>)}</p>
+  </section>
+
+  <section class="wrap section" aria-labelledby="h-notes">
+    <h2 id="h-notes" class="kicker"><b>{c.notes}</b><a class="arrow-link" href={lang === 'tr' ? '/gunluk/' : '/en/journal/'}>{c.allNotes}</a></h2>
+    <ul class="notes">
+      {
+        notes.map((n) => (
+          <li>
+            <a href={postUrl(n.id.split('/')[1], lang)}>
+              <time class="small muted" datetime={n.data.date.toISOString()}>
+                {formatDate(n.data.date, lang)}
+              </time>
+              <span class="nt">{n.data.title}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Book>
+
+<style>
+  .opening {
+    padding-top: clamp(8px, 2vw, 24px);
+  }
+  .open-img {
+    display: block;
+    overflow: hidden;
+  }
+  .open-img :global(img) {
+    width: 100%;
+    height: min(78vh, 900px);
+    object-fit: cover;
+  }
+  .open-cap {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 24px;
+    margin-top: 14px;
+  }
+  .open-cap .small {
+    display: grid;
+  }
+  .ink {
+    color: var(--ink);
+  }
+  .open-q {
+    font-family: var(--serif);
+    font-size: var(--t-l);
+    text-align: right;
+    text-decoration: none;
+  }
+  .open-q:hover {
+    text-decoration: underline;
+  }
+  .statement {
+    padding-block: clamp(80px, 12vw, 176px) 0;
+  }
+  .st-1 {
+    font-size: var(--t-xxl);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    max-width: 16em;
+    margin-bottom: 0.6em;
+  }
+  .st-2 {
+    font-size: var(--t-l);
+    line-height: 1.45;
+    color: var(--ink-2);
+    max-width: 30em;
+    margin-left: clamp(0px, 16vw, 280px);
+  }
+  .statement .arrow-link {
+    margin-left: clamp(0px, 16vw, 280px);
+  }
+  .after {
+    margin-top: 24px;
+  }
+  .places {
+    padding-bottom: clamp(32px, 5vw, 64px);
+  }
+  .place-line {
+    font-size: var(--t-xxl);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+  .place-line i {
+    font-style: normal;
+    color: var(--muted);
+  }
+  .notes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .notes a {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    align-items: baseline;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+  }
+  .nt {
+    font-size: var(--t-l);
+    line-height: 1.25;
+  }
+  .notes a:hover .nt {
+    text-decoration: underline;
+    text-decoration-color: var(--rule-2);
+  }
+  @media (max-width: 760px) {
+    .open-img :global(img) {
+      height: 62vh;
+    }
+    .open-cap {
+      flex-direction: column;
+      gap: 8px;
+    }
+    .open-q {
+      text-align: left;
+    }
+    .notes a {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+</style>

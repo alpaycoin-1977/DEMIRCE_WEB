@@ -17,10 +17,17 @@ jobs:
       - run: npm ci
       - name: Tip denetimi
         run: npm run check
-      - name: Derleme
+      - name: Derleme — Pafta
         run: npm run build
+      - name: Derleme — Monografi
+        run: npm run build:alt
       - uses: actions/upload-artifact@v4
         with:
           name: demirce-site
           path: dist
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: demirce-site-monografi
+          path: dist-alt
           retention-days: 7

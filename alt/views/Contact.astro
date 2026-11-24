@@ -1,0 +1,175 @@
+---
+import Book from '@alt/layouts/Book.astro';
+import { SITE } from '~/data/site';
+import type { Lang } from '~/i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const c =
+  lang === 'tr'
+    ? { title: 'İletişim', write: 'Bize yazın', name: 'Ad soyad', email: 'E-posta', msg: 'Mesaj', consent: 'Kişisel verilerimin talebimi yanıtlamak amacıyla işlenmesine ilişkin', link: 'aydınlatma metnini', end: 'okudum.', send: 'Gönder', ok: 'Teşekkürler, mesajınız bize ulaştı.', fb: 'Sunucuya ulaşılamadı; e-posta uygulamanızda bir taslak açılıyor.', dir: 'Yol tarifi' }
+    : { title: 'Contact', write: 'Write to us', name: 'Name', email: 'Email', msg: 'Message', consent: 'I have read the', link: 'privacy notice', end: 'on how my data is processed.', send: 'Send', ok: 'Thank you, your message has reached us.', fb: 'We could not reach the server; opening a draft in your email app.', dir: 'Directions' };
+---
+
+<Book lang={lang} title={c.title} alternates={{ tr: '/iletisim/', en: '/en/contact/' }}>
+  <section class="wrap head">
+    <h1>{c.title}</h1>
+    <div class="grid">
+      <address class="addr">
+        {SITE.address.street}<br />
+        {SITE.address.district} / {SITE.address.city}
+        <a class="arrow-link" href={SITE.mapsUrl} target="_blank" rel="noopener">{c.dir}</a>
+      </address>
+      <p class="lines">
+        <a href={SITE.phoneHref}>{SITE.phone}</a><br />
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="wrap section" aria-labelledby="h-w">
+    <h2 id="h-w" class="kicker"><b>{c.write}</b></h2>
+    <form class="form" method="post" action={SITE.formEndpoint} novalidate data-form data-email={SITE.email} data-m={JSON.stringify(c)}>
+      <label><span class="small muted">{c.name}</span><input name="name" required maxlength="120" autocomplete="name" /></label>
+      <label><span class="small muted">{c.email}</span><input name="email" type="email" required maxlength="160" autocomplete="email" /></label>
+      <label class="full"><span class="small muted">{c.msg}</span><textarea name="message" rows="6" required minlength="10" maxlength="6000"></textarea></label>
+      <input type="hidden" name="subject" value={lang === 'tr' ? 'Web sitesi' : 'Website'} />
+      <input type="hidden" name="lang" value={lang} />
+      <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off" /></div>
+      <label class="check full small"><input type="checkbox" name="consent" required /> <span>{c.consent} <a href={lang === 'tr' ? '/kvkk/' : '/en/privacy/'}>{c.link}</a> {c.end}</span></label>
+      <div class="full row"><button type="submit">{c.send}</button><span class="small status" role="status" aria-live="polite" data-status></span></div>
+    </form>
+  </section>
+</Book>
+
+<style>
+  .head {
+    padding-block: clamp(56px, 9vw, 140px) 0;
+  }
+  h1 {
+    font-size: var(--t-xxl);
+    margin-bottom: 40px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    font-size: var(--t-xl);
+    line-height: 1.25;
+  }
+  address {
+    font-style: normal;
+  }
+  .addr .arrow-link {
+    display: block;
+    margin-top: 16px;
+  }
+  .lines a {
+    text-decoration: none;
+  }
+  .lines a:hover {
+    text-decoration: underline;
+  }
+  .form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 32px;
+    max-width: 960px;
+  }
+  .form label {
+    display: grid;
+    gap: 6px;
+  }
+  .full {
+    grid-column: 1 / -1;
+  }
+  input:not([type='checkbox']),
+  textarea {
+    font: inherit;
+    font-size: var(--t-m);
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--rule-2);
+    padding: 8px 0;
+    border-radius: 0;
+  }
+  textarea {
+    resize: vertical;
+  }
+  input:focus,
+  textarea:focus {
+    outline: none;
+    border-bottom-color: var(--ink);
+  }
+  .invalid {
+    border-bottom-color: #b3261e !important;
+  }
+  .check {
+    display: flex !important;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .hp {
+    position: absolute;
+    left: -9999px;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  button {
+    font-family: var(--sans);
+    font-size: var(--t-s);
+    padding: 12px 22px;
+    background: var(--ink);
+    color: var(--paper);
+    border: 0;
+    cursor: pointer;
+  }
+  button:hover {
+    opacity: 0.85;
+  }
+  @media (max-width: 700px) {
+    .grid,
+    .form {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-form]');
+  if (form) {
+    const M = JSON.parse(form.dataset.m || '{}');
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let ok = true;
+      form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[required]').forEach((el) => {
+        const v = el.type === 'checkbox' ? (el as HTMLInputElement).checked : el.checkValidity();
+        el.classList.toggle('invalid', !v);
+        if (!v && ok) {
+          el.focus();
+          ok = false;
+        }
+      });
+      if (!ok) return;
+      const fd = new FormData(form);
+      try {
+        const r = await fetch(form.action, { method: 'POST', body: fd, headers: { Accept: 'application/json' } });
+        const d = await r.json().catch(() => null);
+        if (!r.ok || !d?.ok) throw 0;
+        status.textContent = M.ok;
+        form.reset();
+      } catch {
+        status.textContent = M.fb;
+        const body = `${fd.get('name')} <${fd.get('email')}>\n\n${fd.get('message')}`;
+        location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent('[demirce.com] ' + fd.get('subject'))}&body=${encodeURIComponent(body)}`;
+      }
+    });
+  }
+</script>

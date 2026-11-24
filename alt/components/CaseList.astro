@@ -1,0 +1,123 @@
+---
+/** Derinlemesine incelemeler — soru ile açılan, kitap içindekiler sayfası gibi liste */
+import { Image } from 'astro:assets';
+import { cases, ROMAN } from '@alt/data/cases';
+import { resolveRef } from '@alt/data/refs';
+import { getProject } from '~/data/projects';
+import { projectUrl, type Lang } from '~/i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+---
+
+<ol class="cases">
+  {
+    cases.map((c, i) => {
+      const p = getProject(c.slug)!;
+      const place = [p.district?.[lang], p.city?.[lang]].filter(Boolean).join(', ');
+      return (
+        <li class={`case rise ${i % 2 ? 'case--r' : ''}`}>
+          <a href={projectUrl(c.slug, lang)}>
+            <span class="num">{ROMAN[i]}</span>
+            <div class="txt">
+              <h3 class="q italic">{c.question[lang]}</h3>
+              <p class="meta small">
+                <span class="name">{p.title[lang]}</span>
+                <span class="muted">
+                  {place}
+                  {p.year ? ` · ${p.year}` : ''}
+                  {p.award ? ` · ${p.award[lang]}` : ''}
+                </span>
+              </p>
+              <span class="arrow-link">{lang === 'tr' ? 'İncelemeyi oku' : 'Read the study'}</span>
+            </div>
+            <div class="img">
+              <Image src={resolveRef(c.hero, c.slug)} alt={p.title[lang]} widths={[480, 800, 1200]} sizes="(min-width: 900px) 50vw, 100vw" loading={i === 0 ? 'eager' : 'lazy'} />
+            </div>
+          </a>
+        </li>
+      );
+    })
+  }
+</ol>
+
+<style>
+  .cases {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .case a {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1.25fr);
+    gap: clamp(20px, 4vw, 64px);
+    align-items: center;
+    padding-block: clamp(28px, 4vw, 56px);
+    border-top: 1px solid var(--rule);
+    text-decoration: none;
+  }
+  .case:first-child a {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .case--r a {
+    grid-template-columns: 70px minmax(0, 1.25fr) minmax(0, 1fr);
+  }
+  .case--r .img {
+    order: -1;
+    grid-column: 2;
+  }
+  .case--r .txt {
+    grid-column: 3;
+  }
+  .case--r .num {
+    order: -2;
+  }
+  .num {
+    align-self: start;
+    font-size: var(--t-l);
+    color: var(--muted);
+  }
+  .q {
+    font-size: var(--t-xl);
+    margin-bottom: 18px;
+  }
+  .meta {
+    display: grid;
+    gap: 2px;
+    margin-bottom: 18px;
+  }
+  .name {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .img {
+    overflow: hidden;
+  }
+  .img :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    transition: transform 1.6s var(--ease);
+  }
+  .case a:hover .img :global(img) {
+    transform: scale(1.025);
+  }
+  @media (max-width: 860px) {
+    .case a,
+    .case--r a {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .case--r .img,
+    .case--r .txt {
+      grid-column: auto;
+      order: 0;
+    }
+    .num {
+      font-size: var(--t-s);
+    }
+  }
+</style>
