@@ -6,6 +6,7 @@ import { getCollection } from 'astro:content';
 import type { ImageMetadata } from 'astro';
 import Logo from '~/components/Logo.astro';
 import Land from '~/components/Land.astro';
+import Figure from '~/components/Figure.astro';
 import { SITE } from '~/data/site';
 import { approach } from '~/data/approach';
 import { projectCover } from '~/lib/images';
@@ -169,6 +170,19 @@ const coords = formatCoords(SITE.geo.lat, SITE.geo.lon, lang);
     </header>
 
     <main id="icerik" tabindex="-1"><slot /></main>
+
+    <!-- Zemin: cephe toprağa basar; ağaçlar ve insanlar ölçek verir -->
+    <div class="ground" aria-hidden="true">
+      <div class="wrap gr">
+        <img src={u('/art/cam-1.svg')} alt="" class="tree t1" loading="lazy" width="600" height="1000" />
+        <img src={u('/art/cam-2.svg')} alt="" class="tree t2" loading="lazy" width="600" height="1000" />
+        <img src={u('/art/cam-3.svg')} alt="" class="tree t3" loading="lazy" width="600" height="1000" />
+        <Figure pose="walk" class="gf g1" />
+        <Figure pose="stand" class="gf g2" mirror />
+        <Figure pose="look" class="gf g3" />
+        <span class="gl mono">{lang === 'tr' ? 'Zemin' : 'Ground'} ±0,00</span>
+      </div>
+    </div>
 
     <footer class="site-foot night">
       <div class="wrap foot-top">
@@ -418,8 +432,78 @@ const coords = formatCoords(SITE.geo.lat, SITE.geo.lon, lang);
         overflow: hidden;
       }
 
+      .ground {
+        margin-top: clamp(64px, 8vw, 120px);
+        overflow: hidden;
+      }
+      .gr {
+        position: relative;
+        height: clamp(220px, 30vw, 460px);
+      }
+      .tree {
+        position: absolute;
+        bottom: 0;
+        width: auto;
+        filter: none;
+        pointer-events: none;
+      }
+      .t1 {
+        right: calc(var(--gutter) + 9%);
+        height: 100%;
+      }
+      .t2 {
+        right: calc(var(--gutter) + 20%);
+        height: 76%;
+      }
+      .t3 {
+        right: calc(var(--gutter) - 1%);
+        height: 62%;
+      }
+      .ground :global(.gf) {
+        position: absolute;
+        bottom: 0;
+        height: clamp(30px, 3.6vw, 52px);
+        color: var(--ink);
+      }
+      .ground :global(.g1) {
+        left: 23.6%;
+      }
+      .ground :global(.g2) {
+        left: 61.8%;
+      }
+      .ground :global(.g3) {
+        left: calc(61.8% + 2.2vw);
+      }
+      .gl {
+        position: absolute;
+        left: var(--gutter);
+        bottom: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+      .gl::before {
+        content: '';
+        display: inline-block;
+        margin-right: 8px;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 8px solid currentColor;
+      }
+      @media (prefers-color-scheme: dark) {
+        .tree {
+          filter: invert(0.9);
+        }
+      }
+      @media (max-width: 640px) {
+        .t2 {
+          right: 34%;
+        }
+        .t1 {
+          right: 8%;
+        }
+      }
       .site-foot {
-        margin-top: clamp(80px, 10vw, 150px);
+        margin-top: 0;
         padding-top: clamp(56px, 7vw, 96px);
       }
       .foot-top {
@@ -608,14 +692,6 @@ const coords = formatCoords(SITE.geo.lat, SITE.geo.lon, lang);
       }
     </style>
     <script>
-      // Dokunmatik ekranlarda görsel ekranın ortasına gelince renklenir
-      if (matchMedia('(hover: none)').matches && 'IntersectionObserver' in window) {
-        const io = new IntersectionObserver(
-          (entries) => entries.forEach((e) => e.target.classList.toggle('in-focus', e.isIntersecting)),
-          { rootMargin: '-38% 0px -38% 0px' },
-        );
-        document.querySelectorAll('main img').forEach((img) => io.observe(img));
-      }
       const nav = document.querySelector<HTMLElement>('.nav');
       const btn = nav?.querySelector<HTMLButtonElement>('.nav-btn');
       const setOpen = (open: boolean) => {

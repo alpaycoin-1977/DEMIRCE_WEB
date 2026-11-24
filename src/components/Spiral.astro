@@ -1,0 +1,27 @@
+---
+/**
+ * Altın spiral + düzenleyici çizgiler (Fibonacci kareleri).
+ * Görsellerin ve duvarların üzerinde yalnızca ince çizgi olarak durur.
+ */
+import { goldenSubdivision, PHI } from '~/lib/geometry';
+interface Props {
+  /** 'land' = yatay altın dikdörtgen, 'port' = dikey */
+  orient?: 'land' | 'port';
+  levels?: number;
+  squares?: boolean;
+  class?: string;
+  /** çizgileri sayfaya girerken çiz */
+  draw?: boolean;
+  flip?: boolean;
+}
+const { orient = 'land', levels = 10, squares = true, class: cls = '', draw = true, flip = false } = Astro.props;
+const W = orient === 'land' ? 1000 * PHI : 1000;
+const H = orient === 'land' ? 1000 : 1000 * PHI;
+const g = goldenSubdivision(W, H, levels);
+const r = (n: number) => Math.round(n * 10) / 10;
+---
+
+<svg class={`spiral ${draw ? 'spiral--draw' : ''} ${cls}`} viewBox={`0 0 ${r(W)} ${r(H)}`} preserveAspectRatio="none" aria-hidden="true" fill="none" stroke="currentColor" vector-effect="non-scaling-stroke" style={flip ? 'transform: scaleX(-1)' : undefined}>
+  {squares && <path class="sq" d={g.squares.map((s) => `M${r(s.x)} ${r(s.y)}h${r(s.w)}v${r(s.h)}h${r(-s.w)}Z`).join('')} vector-effect="non-scaling-stroke" />}
+  <path class="arc" d={g.spiral} pathLength="1" vector-effect="non-scaling-stroke" />
+</svg>

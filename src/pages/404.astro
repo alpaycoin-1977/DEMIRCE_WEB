@@ -1,18 +1,18 @@
 ---
 import Book from '~/layouts/Book.astro';
-import Land from '~/components/Land.astro';
+import Vitruvius from '~/components/Vitruvius.astro';
 import { u } from '~/i18n/ui';
 ---
 
 <Book lang="tr" title="Sayfa bulunamadı" alternates={{ tr: '/', en: '/en/' }} noindex>
   <section class="wrap nf">
     <div>
-      <p class="sign"><b>404 · HARİTADA YOK</b><span>00,0000° K · 00,0000° D</span></p>
-      <h1 class="q">Bu arazi henüz haritada yok.</h1>
+      <p class="sign"><b>404 · PENCERE YOK</b><span>φ = 1,618 · ±0,00</span></p>
+      <h1 class="q">Bu cephede böyle bir pencere yok.</h1>
       <p>Aradığınız sayfa taşınmış ya da kaldırılmış olabilir. <a href={u('/projeler/')}>Çalışmalar</a> sayfasından ya da <a href={u('/')}>ana sayfadan</a> devam edebilirsiniz.</p>
       <p class="small muted">This page could not be found. <a href={u('/en/')}>English</a></p>
     </div>
-    <Land seed="kayip-arazi-404" class="nf-land" threshold={0.5} levels={40} hair={0.5} />
+    <Vitruvius class="nf-land" />
   </section>
 </Book>
 

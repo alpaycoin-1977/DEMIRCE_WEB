@@ -1,0 +1,27 @@
+---
+/** İnsan silüeti — Vitruvius oranlarıyla koddan çizilir (boy = kulaç, baş = 1/8) */
+import { figure, POSES } from '~/lib/geometry';
+interface Props {
+  pose?: keyof typeof POSES;
+  /** ikinci duruş (Vitruvius gibi üst üste iki duruş) */
+  pose2?: keyof typeof POSES;
+  mirror?: boolean;
+  class?: string;
+}
+const { pose = 'stand', pose2, mirror = false, class: cls = '' } = Astro.props;
+const figs = [pose, ...(pose2 ? [pose2] : [])].map((p) => figure(POSES[p], 100, 0, 0, mirror));
+const wide = pose.startsWith('vitruvian') || pose2?.startsWith('vitruvian');
+const vb = wide ? '-52 -16 104 118' : '-30 -2 60 104';
+---
+
+<svg class={`fig ${cls}`} viewBox={vb} aria-hidden="true" fill="currentColor">
+  {
+    figs.map((parts, k) => (
+      <g opacity={k === 1 ? 0.5 : undefined}>
+        {parts.map((d) => (
+          <path d={d} />
+        ))}
+      </g>
+    ))
+  }
+</svg>

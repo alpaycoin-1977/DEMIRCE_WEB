@@ -1,10 +1,10 @@
 ---
 /**
  * İç sayfa başlığı: numaralı etiket satırı, büyük dar başlık ve
- * sayfanın kendi arazisi (sayfa adından türeyen topoğrafya).
+ * sayfanın kendi cephe kompozisyonu (sayfa adından türeyen, altın oranlı).
  */
 import type { ImageMetadata } from 'astro';
-import Land from '~/components/Land.astro';
+import Facade from '~/components/Facade.astro';
 
 interface Props {
   n: string;
@@ -30,7 +30,7 @@ const { n, label, note, title, lead, seed, photo, alt, threshold = 0.56, hair } 
       {lead && <p class="ph-lead">{lead}</p>}
       <slot />
     </div>
-    <Land seed={seed} photo={photo} alt={alt} class="ph-land" threshold={threshold} hair={hair} levels={30} />
+    <Facade seed={seed} class="ph-land" label={alt} />
   </div>
 </header>
 
@@ -63,7 +63,6 @@ const { n, label, note, title, lead, seed, photo, alt, threshold = 0.56, hair } 
     margin: 0;
   }
   .ph-grid :global(.ph-land) {
-    aspect-ratio: 4 / 3;
     width: 100%;
   }
   @media (max-width: 860px) {
@@ -71,7 +70,6 @@ const { n, label, note, title, lead, seed, photo, alt, threshold = 0.56, hair } 
       grid-template-columns: 1fr;
     }
     .ph-grid :global(.ph-land) {
-      aspect-ratio: 16 / 9;
       order: -1;
     }
   }

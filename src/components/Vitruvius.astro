@@ -1,0 +1,49 @@
+---
+/** VİTRUVİUS — çember, kare ve iki duruşlu figür; altın spiral ile */
+import Figure from '~/components/Figure.astro';
+interface Props {
+  class?: string;
+  label?: string;
+}
+const { class: cls = '', label } = Astro.props;
+---
+
+<figure class={`vitruvius ${cls}`} role={label ? 'img' : undefined} aria-label={label}>
+  <svg class="vt-lines" viewBox="0 0 1000 1000" aria-hidden="true" fill="none" stroke="currentColor">
+    <rect x="160" y="230" width="680" height="680" stroke-width="1.6" />
+    <circle cx="500" cy="502" r="408" stroke-width="1.6" />
+    <path d="M500 40v940M40 570h920" stroke-width="0.8" stroke-dasharray="4 6" />
+    <path d="M160 230L840 910M840 230L160 910" stroke-width="0.6" opacity="0.5" />
+    <g class="vt-ticks" font-family="var(--mono)" font-size="15" fill="currentColor" stroke="none" letter-spacing="1">
+      <text x="160" y="214">1/8</text>
+      <text x="846" y="226">φ = 1,618</text>
+      <text x="852" y="574">0,618</text>
+      <text x="506" y="992">± 0,00</text>
+    </g>
+  </svg>
+  <Figure pose="vitruvianA" pose2="vitruvianB" class="vt-fig" />
+</figure>
+
+<style>
+  .vitruvius {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 1;
+    color: var(--ink);
+  }
+  .vt-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .vitruvius :global(.vt-fig) {
+    position: absolute;
+    left: 50%;
+    bottom: 7.6%;
+    height: 80.2%;
+    transform: translateX(-50%);
+    color: var(--ink);
+  }
+</style>

@@ -29,6 +29,9 @@
   --night-rule: rgb(233 232 227 / 0.16);
   --land-paper: var(--paper);
   --land-ink: var(--ink);
+  /* Cephe: beton duvar */
+  --wall: #d6d5d1;
+  --wall-2: #c4c3bf;
 
   --display: 'Saira Variable', 'Saira', 'Arial Narrow', 'Roboto Condensed', sans-serif;
   --sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -60,6 +63,8 @@
     --rule-2: rgb(233 232 227 / 0.3);
     --night: #050505;
     --night-2: #101010;
+    --wall: #2a2a29;
+    --wall-2: #1f1f1e;
   }
 }
 
@@ -93,32 +98,52 @@ img {
   height: auto;
 }
 
-/* Siyah-beyaz arşiv: renk ilgiyle gelir.
-   Masaüstünde üzerine gelince, dokunmatik ekranda görsel ekranın ortasındayken. */
+/* Tamamen gri tonlamalı: tüm görseller siyah-beyazdır (renk yok). */
 img {
   filter: grayscale(1);
-  transition: filter 0.9s var(--ease);
 }
-@media (hover: hover) {
-  a:hover img,
-  img:hover {
-    filter: grayscale(0);
+
+/* ---------- Cephe çizimleri ---------- */
+.spiral {
+  display: block;
+  overflow: visible;
+}
+.spiral .sq {
+  stroke-width: 0.6;
+  opacity: 0.5;
+}
+.spiral .arc {
+  stroke-width: 1.1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .spiral--draw .arc {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw 5.5s 0.4s var(--ease) forwards;
+  }
+  .spiral--draw .sq {
+    animation: fade 2.4s 0.2s both;
   }
 }
-img.in-focus,
-.in-focus img {
-  filter: grayscale(0);
-}
-@media (prefers-reduced-motion: reduce) {
-  img {
-    transition: none;
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
   }
 }
-@media print {
-  img {
-    filter: none;
-  }
+.facade {
+  display: block;
+  width: 100%;
+  height: auto;
+  --fac-grey: color-mix(in srgb, var(--ink) 22%, var(--paper));
+  --fac-line: var(--paper);
 }
+.fig {
+  display: block;
+  height: 100%;
+  width: auto;
+  overflow: visible;
+}
+
 a {
   color: inherit;
   text-decoration-thickness: 1px;
@@ -331,6 +356,18 @@ p {
   font-family: var(--mono);
   font-weight: 400;
   letter-spacing: 0;
+}
+/* Kot işareti: ▽ +3,20 */
+.sec-head .lv::before {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: 8px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid currentColor;
+  vertical-align: 1px;
 }
 .sec-head .n::after {
   content: '';

@@ -2,27 +2,22 @@
 
 DEMİRCE Mimarlık'ın yeni web sitesi. Eski WordPress sitesindeki projeler, metinler, görseller ve yazılar taşındı; site sıfırdan, hızlı, iki dilli (TR/EN) ve bakımı kolay bir statik site olarak yeniden tasarlandı.
 
-## Kavram — “Arazi”
+## Kavram — “Cephe”
 
-Site, köklü bir ofisin **sanat defteri** gibi okunur: kâğıt, mürekkep, eş yükselti çizgileri. Kendini kanıtlama çabası olmayan bir ofisin sessiz özgüveni; birikim tek tek sayılmadan hissettirilir.
+Site tek bir binanın **iki boyutlu görünüşü** (cephe paftası) gibi okunur. Tamamen gri tonlamalıdır.
 
-- **Her çalışmanın kendi arazisi var.** Sayfalardaki topoğrafya çizimleri hazır görsel değildir; tarayıcıda, çalışmanın adından türeyen tohumla **kodla üretilir** (`src/lib/land.ts`, `src/scripts/land.ts`). Aynı ad her zaman aynı araziyi verir. Eş yükselti çizgileri birkaç saniyede bir yavaşça akar. Fotoğraflı arazilerde fotoğraf her yerde tam görünür, eğriler yalnızca ince çizgi olarak üstünden geçer; fotoğrafsız arazilerde mürekkep lekeleri ve nokta ızgarası vardır. Hareketi azaltma tercihi olan ziyaretçilerde arazi durağandır; ekran dışındayken çizim durur.
-- **Kapak:** büyük logo, “Doğru soru, doğru zamanda.” satırı ve sağda her gün başka bir incelemeyi içinden gösteren arazi. Ofisin tanıtım filmindeki koordinat tabelası (DEMİRCE · ALSANCAK, 38,4304° K · 27,1358° D) sitenin imzasıdır; her incelemenin ve levhanın künyesinde kendi koordinatları yer alır.
-- **Numaralı bölümler** (01 Kapak · 02 Derinlemesine · 03 Ofis · 04 Ölçekler · 05 Kesitler), nokta ızgaraları, ince çizgiler ve siyah bantlar — eski “D’NORMS” arayüz çalışmasından alınan dil.
-- **Sayı yok, seçki var.** Hiçbir yerde proje sayısı verilmez. Birikim *ölçek* (1:20 — 1:5000), *coğrafya* (İzmir — Atırav), *süreklilik* (1999 —), tüm adların tek paragraflık dizini ve isimsiz *kesitler* ile anlatılır.
-- **Beş derinlemesine inceleme**, ofisin “doğru soruyu doğru zamanda sormak” ilkesine bağlanan birer soruyla açılır:
-  1. *Bir okul, bir kentin omurgası olabilir mi?* — Mersin Mezitli Eğitim Kampüsü
-  2. *Yoğunluk ile konfor bir arada var olabilir mi?* — Fenix84 Antalya
-  3. *Rezidans gerçekte nedir?* — Borncity
-  4. *Bir yapıya ikinci bir hayat nasıl verilir?* — İlayda Avantgarde Otel
-  5. *Bir öğrenci için ev mi, otel mi?* — Coordinat Bornova
-- **Siyah-beyaz arşiv:** tüm görseller gri tonlamalıdır; renk ilgiyle gelir — masaüstünde görselin üzerine gelince, telefonda görsel ekranın ortasındayken.
-- **Altbilgi** siyah bir banttır: *Yaklaşım* (beş ilke, açılır liste), son *Notlar*, *İletişim* (“Bir sonraki soruyu birlikte soralım.”) ve ofisin kendi arazisi.
-- **Yazı tipleri:** Saira (dar, büyük harf başlıklar), Inter (metin), Newsreader italik (sorular, uzun okuma), JetBrains Mono (koordinat, ölçek, numara). Hepsi siteden sunulur. Türkçe büyük harfte yabancı marka adları korunur (FENİX84 değil FENIX84; `src/lib/text.ts`).
-- **Ad:** Sitede “DEMİRCE” kullanılır. “D’NORMS / DEMİRCE NORMS” adına geçilmek istenirse logo ve `src/data/site.ts` dışında değişiklik gerekmez.
+- **Çatıdan zemine:** Her bölüm bir kattır ve kot işaretiyle başlar (▽ +16,00 → +3,20). Sayfanın sonunda zemin (±0,00) vardır: kodla çizilen çam ağaçları ve yürüyen insanlar. Zeminin altında, kesit gibi, ofisin arazisi (eş yükselti eğrileri) durur.
+- **Fibonacci / altın oran (φ):** Kapaktaki duvar bir altın dikdörtgendir; dar pencere altın spiralin gözüne oturur ve her gün başka bir çalışma o pencereden görünür. İç sayfa başlıklarındaki siyah / taranmış dikdörtgen kompozisyonlar altın bölünmeden üretilir ve sayfa adına göre her seferinde aynı çıkar (`src/lib/geometry.ts`).
+- **Vitruvius:** İnsan silüetleri Vitruvius oranlarıyla (boy = kulaç, baş = boyun 1/8'i) koddan çizilir; Ofis bölümünde çember, kare ve iki duruşlu figür yer alır.
+- **Pencereler:** Beş derinlemesine inceleme, siyah cephe pencereleridir; içlerinde insanlar durur, üzerine gelince çalışma ve sorusu görünür.
+- **Kesitler:** Tüm çalışmalar, Fibonacci açıklıklı, boşluksuz bir cephe ızgarasında; kalan boşluklar siyah, taranmış ya da boş panellerle dolar.
+- **Çizgiler görsellerin üzerinde yalnızca çizgidir** (altın spiral, düzenleyici kareler); görselin önünü kapatan dolgu yoktur.
+- **Sayı yok, seçki var.** Birikim ölçek (1:20 — 1:5000), oran ve süreklilikle anlatılır.
+- **Görseller:** Tüm çizimler (ağaçlar, silüetler, kompozisyonlar) koddan üretilir; dışarıdan alınmış hazır görsel kullanılmaz.
+- **Yazı tipleri:** Saira (dar, büyük harf başlıklar), Inter (metin), Newsreader italik (sorular), JetBrains Mono (kot, koordinat, ölçek).
 
 ## Teknik özellikler
-- **Hız:** Statik HTML; tek JavaScript dosyası arazi çizimidir (~6,5 KB, ekrana yaklaşınca çalışır). Görseller derlemede WebP'ye çevrilip `srcset` ile boyutlandırılır; yazı tipleri siteden sunulur.
+- **Hız:** Statik HTML; çizimler derlemede SVG olarak üretilir. Tek JavaScript dosyası altbilgideki arazi çizimidir (~6,5 KB, ekrana yaklaşınca çalışır). Görseller derlemede WebP'ye çevrilip `srcset` ile boyutlandırılır; yazı tipleri siteden sunulur.
 - **Akıcı gezinme:** View Transitions ile yumuşak sayfa geçişleri, Speculation Rules ile önceden yüklenen sayfalar.
 - **SEO:** Sayfa başına başlık/açıklama, canonical, `hreflang`, Open Graph görselleri, JSON-LD (LocalBusiness, Article, CreativeWork, BreadcrumbList), site haritası, RSS, robots.txt, web uygulaması manifesti.
 - **Eski adresler korunur:** Eski WordPress adreslerinin tümü (`/portfolio/...`, `/portfolyo/`, blog yazıları, `/feed/`) yeni adreslere **301** ile yönlendirilir (`public/.htaccess`, `public/_redirects`).
@@ -72,7 +67,9 @@ src/
   views/         Sayfa gövdeleri (TR ve EN ortak)
   pages/         Adresler (TR kök, EN /en/)
   components/    Arazi (Land), sayfa başlığı, şekil, inceleme listesi, ölçekler, kesitler, dizin, logo, KVKK
-  lib/land.ts          Arazi motoru: tohumlu gürültü, eş yükselti çizgileri
+  lib/geometry.ts      Altın oran, Fibonacci spirali, cephe kompozisyonu, silüet, ağaç
+  lib/land.ts          Arazi motoru (zemin altı kesit): eş yükselti çizgileri
+  pages/art/           Üretken ağaç çizimleri (SVG)
   scripts/land.ts      Arazinin tarayıcıda çizimi ve yavaş akışı
   layouts/Book.astro   Başlık, altbilgi, SEO
   styles/book.css      Tasarım sistemi (kâğıt / mürekkep)

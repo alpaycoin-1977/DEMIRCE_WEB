@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import Book from '~/layouts/Book.astro';
 import PageHead from '~/components/PageHead.astro';
-import Land from '~/components/Land.astro';
+import Facade from '~/components/Facade.astro';
 import { approach } from '~/data/approach';
 import { SITE } from '~/data/site';
 import { timeline } from '~/data/timeline';
@@ -88,7 +88,7 @@ const img = projectCover('ilayda-avantgarde');
         <p class="q">{c.quote}</p>
         <footer class="mono muted">— {c.quoteBy}, 2013</footer>
       </blockquote>
-      <Land seed="yasama-bicimi" class="qb-land" threshold={0.6} levels={30} hair={0.2} />
+      <Facade seed="yasama-bicimi" class="qb-land" ratio={1 / 1.618} />
     </div>
   </section>
 
@@ -202,14 +202,15 @@ const img = projectCover('ilayda-avantgarde');
     margin-bottom: 20px;
   }
   .qb :global(.qb-land) {
-    aspect-ratio: 1;
+    max-width: 420px;
+    justify-self: center;
   }
   @media (max-width: 860px) {
     .qb {
       grid-template-columns: 1fr;
     }
     .qb :global(.qb-land) {
-      aspect-ratio: 16 / 9;
+      max-width: 260px;
     }
   }
   .principles {
