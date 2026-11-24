@@ -114,7 +114,7 @@ Depoyu bağlayın; derleme komutu `npm run build`, çıktı klasörü `dist`, No
 GitHub Actions (`.github/workflows/ci.yml`) her gönderimde tip denetimi ve derleme yapar, derlenmiş siteyi indirilebilir bir paket olarak saklar.
 
 ### Önizleme — GitHub Pages
-`main` dalına her gönderimde site **https://alpaycoin-1977.github.io/DEMIRCE_WEB/** adresinde otomatik yayınlanır (`.github/workflows/pages.yml`).
+Deponun varsayılan dalına her gönderimde site **https://alpaycoin-1977.github.io/DEMIRCE_WEB/** adresinde otomatik yayınlanır (GitHub, Pages yayınına yalnızca varsayılan daldan izin verir) (`.github/workflows/pages.yml`).
 - İlk kurulum (bir kez): GitHub → **Settings → Pages → Build and deployment → Source: “GitHub Actions”**. Ardından Actions → “Önizleme (GitHub Pages)” → **Run workflow**.
 - Önizleme arama motorlarına kapalıdır (`noindex` + `robots.txt`); canonical adresler www.demirce.com'u gösterir.
 - Önizlemede PHP çalışmadığı için iletişim formu ziyaretçinin e-posta uygulamasında taslak açar.

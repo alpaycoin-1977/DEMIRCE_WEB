@@ -1,12 +1,14 @@
 # ÖNİZLEME — GitHub Pages
-# main dalına her gönderimde siteyi https://alpaycoin-1977.github.io/DEMIRCE_WEB/
+# Varsayılan dala her gönderimde siteyi https://alpaycoin-1977.github.io/DEMIRCE_WEB/
 # adresinde yayınlar. Önizleme arama motorlarına kapalıdır (noindex + robots.txt).
 # İlk kurulum: GitHub → Settings → Pages → Build and deployment → Source: "GitHub Actions"
 name: Önizleme (GitHub Pages)
 
+# GitHub, Pages yayınına yalnızca deponun varsayılan dalından izin verir.
+# Bu yüzden yayın işi yalnızca varsayılan dala yapılan gönderimlerde çalışır.
 on:
   push:
-    branches: [main]
+    branches: [main, 'claude/**']
   workflow_dispatch:
 
 permissions:
@@ -15,11 +17,12 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
+    if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
